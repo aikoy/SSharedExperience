@@ -19,7 +19,6 @@ using Rectangle = SharpDX.Rectangle;
 
 namespace SAssemblies.Miscs
 {
-    using System.Reflection;
     using System.Web.Script.Serialization;
     using System.Windows.Forms;
 
@@ -58,7 +57,6 @@ namespace SAssemblies.Miscs
                 return;
 
             Common.ExecuteInOnGameUpdate(() => Init());
-            Console.WriteLine(Assembly.GetExecutingAssembly().GetName());
 
             int index = 0;
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
@@ -201,8 +199,11 @@ namespace SAssemblies.Miscs
                 MainBitmap.AddText(champ.ChampionKDA.WebsiteContent, new System.Drawing.Point((int)champ.ChampionKDA.Position.X, (int)champ.ChampionKDA.Position.Y), Brushes.Orange);
                 MainBitmap.AddText("Click here!", new System.Drawing.Point((int)champ.Runes.Position.X, (int)champ.Runes.Position.Y), Brushes.Orange);
             }
-            Common.ExecuteInOnGameUpdate(() => this.MainFrame.UpdateTextureBitmap(this.MainBitmap.Bitmap));
-            this.MainBitmap.SetOriginalBitmap(this.MainBitmap.Bitmap);
+            Common.ExecuteInOnGameUpdate(() =>
+                {
+                    this.MainFrame.UpdateTextureBitmap(this.MainBitmap.Bitmap);
+                    this.MainBitmap.SetOriginalBitmap(this.MainBitmap.Bitmap);
+            });
             FinishedLoadingComplete = true;
         }
 
@@ -378,13 +379,13 @@ namespace SAssemblies.Miscs
                     try
                     {
                         ally.Value.SummonerIcon.WebsiteContent = GetSummonerIcon(ally.Key, ally.Value);
-                        SpriteHelper.DownloadImageRiot(
+                        if (!ally.Value.SummonerIcon.WebsiteContent.Equals(""))
+                        {
+                            SpriteHelper.DownloadImageRiot(
                             ally.Value.SummonerIcon.WebsiteContent,
                             SpriteHelper.ChampionType.None,
                             SpriteHelper.DownloadType.ProfileIcon,
                             @"EloDisplayer\");
-                        if (!ally.Value.SummonerIcon.WebsiteContent.Equals(""))
-                        {
                             ally.Value.SummonerIcon.Sprite = new SpriteHelper.SpriteInfo();
                             ally.Value.SummonerIcon.Sprite.Bitmap = SpriteHelper.SpecialBitmap.ResizeBitmap(SpriteHelper.SpecialBitmap.LoadBitmap(ally.Value.SummonerIcon.WebsiteContent, @"EloDisplayer\"), 0.35f);
                         }
@@ -404,13 +405,13 @@ namespace SAssemblies.Miscs
                     try
                     {
                         enemy.Value.SummonerIcon.WebsiteContent = GetSummonerIcon(enemy.Key, enemy.Value);
-                        SpriteHelper.DownloadImageRiot(
+                        if (!enemy.Value.SummonerIcon.WebsiteContent.Equals(""))
+                        {
+                            SpriteHelper.DownloadImageRiot(
                             enemy.Value.SummonerIcon.WebsiteContent,
                             SpriteHelper.ChampionType.None,
                             SpriteHelper.DownloadType.ProfileIcon,
                             @"EloDisplayer\");
-                        if (!enemy.Value.SummonerIcon.WebsiteContent.Equals(""))
-                        {
                             enemy.Value.SummonerIcon.Sprite = new SpriteHelper.SpriteInfo();
                             enemy.Value.SummonerIcon.Sprite.Bitmap = SpriteHelper.SpecialBitmap.ResizeBitmap(SpriteHelper.SpecialBitmap.LoadBitmap(enemy.Value.SummonerIcon.WebsiteContent, @"EloDisplayer\"), 0.35f);
                         }
@@ -643,7 +644,7 @@ namespace SAssemblies.Miscs
             String patternLeaguePoints = "<div class=\"leaguePoints\">";
 
             String patternSoloUnrankedTierRank = "<span class=\"TierRank\">Unranked</span>";
-            String patternLevel = "<span class=\"Level\">Level 30</span>";
+            String patternLevel = "<span class=\"Level tip\" title=\"Level\">30</span>";
 
             String patternSoloRankedTierRank = "<span class=\"tierRank\">(.*?)</span>";
             String patternSoloRankedLeaguePoints = "<span class=\"LeaguePoints\">(.*?) LP</span>";
