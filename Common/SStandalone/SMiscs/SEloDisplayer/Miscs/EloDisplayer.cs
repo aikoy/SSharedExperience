@@ -19,6 +19,7 @@ using Rectangle = SharpDX.Rectangle;
 
 namespace SAssemblies.Miscs
 {
+    using System.Reflection;
     using System.Web.Script.Serialization;
     using System.Windows.Forms;
 
@@ -57,6 +58,7 @@ namespace SAssemblies.Miscs
                 return;
 
             Common.ExecuteInOnGameUpdate(() => Init());
+            Console.WriteLine(Assembly.GetExecutingAssembly().GetName());
 
             int index = 0;
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
@@ -98,10 +100,13 @@ namespace SAssemblies.Miscs
 
         public static Menu.MenuItemSettings SetupMenu(LeagueSharp.Common.Menu menu)
         {
-            EloDisplayerMisc.Menu = menu.AddSubMenu(new LeagueSharp.Common.Menu(Language.GetString("MISCS_ELODISPLAYER_MAIN"), "SAssembliesMiscsEloDisplayer"));
-            EloDisplayerMisc.MenuItems.Add(
-                EloDisplayerMisc.Menu.AddItem(new LeagueSharp.Common.MenuItem("SAssembliesMiscsEloDisplayerKey", Language.GetString("GLOBAL_KEY")).SetValue(new KeyBind(9, KeyBindType.Toggle))));
-            EloDisplayerMisc.MenuItems.Add(EloDisplayerMisc.CreateActiveMenuItem("SAssembliesMiscsEloDisplayerActive", () => new EloDisplayer()));
+            var newMenu = Menu.GetSubMenu(menu, "SAssembliesMiscsEloDisplayer");
+            if (newMenu == null)
+            {
+                EloDisplayerMisc.Menu = menu.AddSubMenu(new LeagueSharp.Common.Menu(Language.GetString("MISCS_ELODISPLAYER_MAIN"), "SAssembliesMiscsEloDisplayer"));
+                EloDisplayerMisc.Menu.AddItem(new LeagueSharp.Common.MenuItem("SAssembliesMiscsEloDisplayerKey", Language.GetString("GLOBAL_KEY")).SetValue(new KeyBind(9, KeyBindType.Toggle)));
+                EloDisplayerMisc.CreateActiveMenuItem("SAssembliesMiscsEloDisplayerActive", () => new EloDisplayer());
+            }
             return EloDisplayerMisc;
         }
 

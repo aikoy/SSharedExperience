@@ -14,6 +14,8 @@ namespace SEloDisplayer
     using SAssemblies;
     using SAssemblies.Miscs;
 
+    using Menu = SAssemblies.Menu;
+
     internal class MainMenu : SAssemblies.Menu
     {
         private readonly Dictionary<SAssemblies.Menu.MenuItemSettings, Func<dynamic>> MenuEntries;
@@ -28,24 +30,6 @@ namespace SEloDisplayer
                                   { EloDisplayer, () => new EloDisplayer() },
                               };
         }
-
-        public Tuple<SAssemblies.Menu.MenuItemSettings, Func<dynamic>> GetDirEntry(SAssemblies.Menu.MenuItemSettings menuItem)
-        {
-            return new Tuple<SAssemblies.Menu.MenuItemSettings, Func<dynamic>>(menuItem, MenuEntries[menuItem]);
-        }
-
-        public Dictionary<SAssemblies.Menu.MenuItemSettings, Func<dynamic>> GetDirEntries()
-        {
-            return MenuEntries;
-        }
-
-        //public void UpdateDirEntry(ref MenuItemSettings oldMenuItem, MenuItemSettings newMenuItem)
-        //{
-        //    Func<dynamic> save = MenuEntries[oldMenuItem];
-        //    MenuEntries.Remove(oldMenuItem);
-        //    MenuEntries.Add(newMenuItem, save);
-        //    oldMenuItem = newMenuItem;
-        //}
 
         public void UpdateDirEntry(ref SAssemblies.Menu.MenuItemSettings oldMenuItem, SAssemblies.Menu.MenuItemSettings newMenuItem)
         {
@@ -84,13 +68,26 @@ namespace SEloDisplayer
         {
             try
             {
-                var menu = new LeagueSharp.Common.Menu("SEloDisplayer", "SEloDisplayer", true);
+                bool newMenu = false;
+                LeagueSharp.Common.Menu menu;
+                if (Menu.GetMenu("SAssembliesRoot") == null)
+                {
+                    menu = new LeagueSharp.Common.Menu("SAssemblies", "SAssembliesRoot", true);
+                    newMenu = true;
+                }
+                else
+                {
+                    menu = Menu.GetMenu("SAssembliesRoot");
+                }
 
                 MainMenu.Misc = Misc.SetupMenu(menu);
                 mainMenu.UpdateDirEntry(ref MainMenu.EloDisplayer, EloDisplayer.SetupMenu(MainMenu.Misc.Menu));
 
-                menu.AddItem(new MenuItem("By Screeder", "By Screeder V" + Assembly.GetExecutingAssembly().GetName().Version));
-                menu.AddToMainMenu();
+                if (newMenu)
+                {
+                    menu.AddItem(new MenuItem("By Screeder", "By Screeder V" + Assembly.GetExecutingAssembly().GetName().Version));
+                    menu.AddToMainMenu();
+                }
             }
             catch (Exception ex)
             {

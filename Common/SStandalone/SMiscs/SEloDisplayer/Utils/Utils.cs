@@ -53,7 +53,6 @@ namespace SAssemblies
             public bool ForceDisable;
             public dynamic Item;
             public LeagueSharp.Common.Menu Menu;
-            public List<MenuItem> MenuItems = new List<MenuItem>();
             public String Name;
             public List<MenuItemSettings> SubMenus = new List<MenuItemSettings>();
             public Type Type;
@@ -144,7 +143,7 @@ namespace SAssemblies
                 }
                 else
                 {
-                    menuItem = Menu.Items.First(x => x.DisplayName.Equals(Language.GetString("GLOBAL_ACTIVE")));
+                    //menuItem = Menu.Items.First(x => x.DisplayName.Equals(Language.GetString("GLOBAL_ACTIVE")));
                 }
                 if (func != null)
                 {
@@ -197,7 +196,15 @@ namespace SAssemblies
             }
         }
 
-        //public static MenuItemSettings  = new MenuItemSettings();
+        public static LeagueSharp.Common.Menu GetMenu(String menuName)
+        {
+            return LeagueSharp.Common.Menu.RootMenus.FirstOrDefault(x => x.Key.Contains(menuName)).Value;
+        }
+
+        public static LeagueSharp.Common.Menu GetSubMenu(LeagueSharp.Common.Menu menu, String menuName)
+        {
+            return menu.Children.FirstOrDefault(x => x.Name.Equals(menuName));
+        }
     }
 
     class Menu2
@@ -1863,21 +1870,6 @@ namespace SAssemblies
             WardItems.Add(new WardItem(3187, "Hextech Sweeper", "", 800, 5, WardType.TempVision));
             WardItems.Add(new WardItem(3159, "Grez's Spectral Lantern", "", 800, 5, WardType.Temp));
             WardItems.Add(new WardItem(3364, "Oracle's Lens", "", 600, 10, WardType.TempVision));
-        }
-
-        private static void SetupMainMenu()
-        {
-            var menu = new LeagueSharp.Common.Menu("SAssemblies", "SAssembliesWards", true);
-            SetupMenu(menu);
-            menu.AddToMainMenu();
-        }
-
-        public static Menu.MenuItemSettings SetupMenu(LeagueSharp.Common.Menu menu)
-        {
-            Language.SetLanguage();
-            Wards.Menu = menu.AddSubMenu(new LeagueSharp.Common.Menu("Wards", "SAssembliesWards"));
-            Wards.MenuItems.Add(Wards.Menu.AddItem(new MenuItem("SAssembliesWardsActive", Language.GetString("GLOBAL_ACTIVE")).SetValue(false)));
-            return Wards;
         }
 
         public static WardItem GetWardItem()
