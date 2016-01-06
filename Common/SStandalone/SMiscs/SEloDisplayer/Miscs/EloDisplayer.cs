@@ -283,7 +283,7 @@ namespace SAssemblies.Miscs
                         MainBitmap.ResetBitmap();
                         System.Drawing.Font arialFont = new System.Drawing.Font("Arial", 12);
                         Size size = TextRenderer.MeasureText(champ.Runes.WebsiteContent, arialFont);
-                        MainBitmap.AddColoredRectangle(new System.Drawing.Point((int)champ.Runes.Position.X + 150, (int)champ.Runes.Position.Y), new Size(size.Width, size.Height), System.Drawing.Color.Black);
+                        MainBitmap.AddColoredRectangle(new System.Drawing.Point((int)champ.Runes.Position.X + 150, (int)champ.Runes.Position.Y), new Size(size.Width, size.Height), System.Drawing.Color.Black, 90);
                         MainBitmap.AddText(champ.Runes.WebsiteContent, new System.Drawing.Point((int)champ.Runes.Position.X + 150, (int)champ.Runes.Position.Y), Brushes.Orange);
                         Common.ExecuteInOnGameUpdate(() => this.MainFrame.UpdateTextureBitmap(this.MainBitmap.Bitmap));
                         arialFont.Dispose();
@@ -310,7 +310,7 @@ namespace SAssemblies.Miscs
                         MainBitmap.ResetBitmap();
                         System.Drawing.Font arialFont = new System.Drawing.Font("Arial", 12);
                         Size size = TextRenderer.MeasureText(champ.Runes.WebsiteContent, arialFont);
-                        MainBitmap.AddColoredRectangle(new System.Drawing.Point((int)champ.Runes.Position.X + 150, (int)champ.Runes.Position.Y), new Size(size.Width, size.Height), System.Drawing.Color.Black);
+                        MainBitmap.AddColoredRectangle(new System.Drawing.Point((int)champ.Runes.Position.X + 150, (int)champ.Runes.Position.Y), new Size(size.Width, size.Height), System.Drawing.Color.Black, 90);
                         MainBitmap.AddText(champ.Runes.WebsiteContent, new System.Drawing.Point((int)champ.Runes.Position.X + 150, (int)champ.Runes.Position.Y), Brushes.Orange);
                         Common.ExecuteInOnGameUpdate(() => this.MainFrame.UpdateTextureBitmap(this.MainBitmap.Bitmap));
                         arialFont.Dispose();
