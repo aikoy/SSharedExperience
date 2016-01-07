@@ -75,10 +75,12 @@ namespace SAssemblies.Miscs
                 index++;
             }
 
-            Game.OnUpdate += Game_OnGameUpdateAsyncTexts;
+            //Game.OnUpdate += Game_OnGameUpdateAsyncTexts;
             new Thread(LoadSpritesAsync).Start();
             new Thread(LoadTextsAsync).Start();
             Game.OnWndProc += Game_OnWndProc;
+
+            EloDisplayerMisc.GetMenuItem("SAssembliesMiscsEloDisplayerScale").ValueChanged += EloDisplayer_ValueChanged;
         }
 
         ~EloDisplayer()
@@ -103,6 +105,7 @@ namespace SAssemblies.Miscs
             {
                 EloDisplayerMisc.Menu = menu.AddSubMenu(new LeagueSharp.Common.Menu(Language.GetString("MISCS_ELODISPLAYER_MAIN"), "SAssembliesMiscsEloDisplayer"));
                 EloDisplayerMisc.Menu.AddItem(new LeagueSharp.Common.MenuItem("SAssembliesMiscsEloDisplayerKey", Language.GetString("GLOBAL_KEY")).SetValue(new KeyBind(9, KeyBindType.Toggle)));
+                EloDisplayerMisc.Menu.AddItem(new LeagueSharp.Common.MenuItem("SAssembliesMiscsEloDisplayerScale", Language.GetString("GLOBAL_SCALE")).SetValue(new Slider(100, 1, 100)));
                 EloDisplayerMisc.CreateActiveMenuItem("SAssembliesMiscsEloDisplayerActive", () => new EloDisplayer());
             }
             return EloDisplayerMisc;
@@ -201,8 +204,11 @@ namespace SAssemblies.Miscs
             }
             Common.ExecuteInOnGameUpdate(() =>
                 {
-                    this.MainFrame.UpdateTextureBitmap(this.MainBitmap.Bitmap);
                     this.MainBitmap.SetOriginalBitmap(this.MainBitmap.Bitmap);
+                    float scale = EloDisplayerMisc.GetMenuItem("SAssembliesMiscsEloDisplayerScale").GetValue<Slider>().Value / 100f;
+                    this.MainBitmap.Bitmap = SpriteHelper.SpecialBitmap.ResizeBitmap(this.MainBitmap.Bitmap, scale);
+                    this.MainFrame.UpdateTextureBitmap(this.MainBitmap.Bitmap);
+                    this.MainFrame.Position = new Vector2(Drawing.Width / 2 - this.MainBitmap.Bitmap.Width / 2, Drawing.Height / 2 - this.MainBitmap.Bitmap.Height / 2);
             });
             FinishedLoadingComplete = true;
         }
@@ -254,6 +260,7 @@ namespace SAssemblies.Miscs
         {
             if (!IsActive() || !FinishedLoadingComplete)
                 return;
+
             HandleInput((WindowsMessages)args.Msg, Utils.GetCursorPos(), args.WParam);
         }
 
@@ -266,6 +273,7 @@ namespace SAssemblies.Miscs
             int textFontSize = 20;
             bool updated = false;
             int index = 0;
+            float scale = EloDisplayerMisc.GetMenuItem("SAssembliesMiscsEloDisplayerScale").GetValue<Slider>().Value / 100f;
             foreach (var ally in _allies)
             {
                 Obj_AI_Hero hero = ally.Key;
@@ -273,8 +281,8 @@ namespace SAssemblies.Miscs
 
                 if (Utils.IsUnderRectangle(
                     cursorPos,
-                    this.MainFrame.X + champ.Runes.Position.X,
-                    this.MainFrame.Y + champ.Runes.Position.Y,
+                    this.MainFrame.X + champ.Runes.Position.X * scale,
+                    this.MainFrame.Y + champ.Runes.Position.Y * scale,
                     150,
                     textFontSize))
                 {
@@ -285,7 +293,12 @@ namespace SAssemblies.Miscs
                         Size size = TextRenderer.MeasureText(champ.Runes.WebsiteContent, arialFont);
                         MainBitmap.AddColoredRectangle(new System.Drawing.Point((int)champ.Runes.Position.X + 150, (int)champ.Runes.Position.Y), new Size(size.Width, size.Height), System.Drawing.Color.Black, 90);
                         MainBitmap.AddText(champ.Runes.WebsiteContent, new System.Drawing.Point((int)champ.Runes.Position.X + 150, (int)champ.Runes.Position.Y), Brushes.Orange);
-                        Common.ExecuteInOnGameUpdate(() => this.MainFrame.UpdateTextureBitmap(this.MainBitmap.Bitmap));
+                        Common.ExecuteInOnGameUpdate(
+                            () =>
+                                {
+                                    this.MainBitmap.Bitmap = SpriteHelper.SpecialBitmap.ResizeBitmap(this.MainBitmap.Bitmap, scale);
+                                    this.MainFrame.UpdateTextureBitmap(this.MainBitmap.Bitmap);
+                                });
                         arialFont.Dispose();
                     }
                     updated = true;
@@ -300,8 +313,8 @@ namespace SAssemblies.Miscs
 
                 if (Utils.IsUnderRectangle(
                     cursorPos,
-                    this.MainFrame.X + champ.Runes.Position.X,
-                    this.MainFrame.Y + champ.Runes.Position.Y,
+                    this.MainFrame.X + champ.Runes.Position.X * scale,
+                    this.MainFrame.Y + champ.Runes.Position.Y * scale,
                     150,
                     textFontSize))
                 {
@@ -312,7 +325,12 @@ namespace SAssemblies.Miscs
                         Size size = TextRenderer.MeasureText(champ.Runes.WebsiteContent, arialFont);
                         MainBitmap.AddColoredRectangle(new System.Drawing.Point((int)champ.Runes.Position.X + 150, (int)champ.Runes.Position.Y), new Size(size.Width, size.Height), System.Drawing.Color.Black, 90);
                         MainBitmap.AddText(champ.Runes.WebsiteContent, new System.Drawing.Point((int)champ.Runes.Position.X + 150, (int)champ.Runes.Position.Y), Brushes.Orange);
-                        Common.ExecuteInOnGameUpdate(() => this.MainFrame.UpdateTextureBitmap(this.MainBitmap.Bitmap));
+                        Common.ExecuteInOnGameUpdate(
+                            () =>
+                            {
+                                this.MainBitmap.Bitmap = SpriteHelper.SpecialBitmap.ResizeBitmap(this.MainBitmap.Bitmap, scale);
+                                this.MainFrame.UpdateTextureBitmap(this.MainBitmap.Bitmap);
+                            });
                         arialFont.Dispose();
                     }
                     updated = true;
@@ -324,10 +342,20 @@ namespace SAssemblies.Miscs
             {
                 if (this.MainBitmap.ResetBitmap())
                 {
+                    this.MainBitmap.Bitmap = SpriteHelper.SpecialBitmap.ResizeBitmap(this.MainBitmap.Bitmap, scale);
                     this.MainFrame.UpdateTextureBitmap(this.MainBitmap.Bitmap);
                 }
                 lastSelectedIndex = -1;
             }
+        }
+
+        private void EloDisplayer_ValueChanged(object sender, OnValueChangeEventArgs e)
+        {
+            MainBitmap.ResetBitmap();
+            float scale = e.GetNewValue<Slider>().Value / 100f;
+            this.MainBitmap.Bitmap = SpriteHelper.SpecialBitmap.ResizeBitmap(this.MainBitmap.Bitmap, scale);
+            this.MainFrame.UpdateTextureBitmap(this.MainBitmap.Bitmap);
+            this.MainFrame.Position = new Vector2(Drawing.Width / 2 - this.MainBitmap.Bitmap.Width / 2, Drawing.Height / 2 - this.MainBitmap.Bitmap.Height / 2);
         }
 
         void Game_OnGameUpdateAsyncTexts(EventArgs args)
@@ -514,6 +542,11 @@ namespace SAssemblies.Miscs
                     }
                 }
             } while (!finished);
+            if (finished && !Loading && !FinishedLoadingComplete)
+            {
+                Loading = true;
+                new Thread(this.FinishedLoading).Start();
+            }
         }
 
         public static String GetLolWebSiteContent(String webSite)

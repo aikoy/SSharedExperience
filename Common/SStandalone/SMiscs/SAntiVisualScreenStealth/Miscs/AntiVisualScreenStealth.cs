@@ -16,55 +16,27 @@ namespace SAssemblies.Miscs
         public AntiVisualScreenStealth()
         {
             bool available = false;
+            List<String> champNames = new List<string>()
+            {
+                "Akali",
+                "Khazix",
+                "Leblanc",
+                "MonkeyKing",
+                "Nocturne",
+                "Shaco",
+                "Talon",
+                "Teemo",
+                "Twitch",
+                "Vayne",
+            };
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
             {
-                switch (hero.ChampionName)
+                if (champNames.Contains(hero.ChampionName))
                 {
-                    case "Akali":
-                        available = true;
-                        break;
-
-                    case "Khazix":
-                        available = true;
-                        break;
-
-                    case "Leblanc":
-                        available = true;
-                        break;
-
-                    case "MonkeyKing":
-                        available = true;
-                        break;
-
-                    case "Nocturne":
-                        available = true;
-                        break;
-
-                    case "Shaco":
-                        available = true;
-                        break;
-
-                    case "Talon":
-                        available = true;
-                        break;
-
-                    case "Teemo":
-                        available = true;
-                        break;
-
-                    case "Twitch":
-                        available = true;
-                        break;
-
-                    case "Vayne":
-                        available = true;
-                        break;
-                }
-                if (available)
+                    Game.OnProcessPacket += Game_OnGameProcessPacket;
                     break;
+                }
             }
-            if (available)
-                Game.OnProcessPacket += Game_OnGameProcessPacket;
         }
 
         ~AntiVisualScreenStealth()
@@ -98,10 +70,7 @@ namespace SAssemblies.Miscs
             byte packetId = reader.ReadByte();
             if (packetId == 36 || packetId == 21)
             {
-                //reader.ReadInt32();
-                //byte visualStealthActive = reader.ReadByte();
-                //if (visualStealthActive == 1)
-                    args.Process = false;
+                args.Process = false;
             }
         }
     }
