@@ -83,7 +83,8 @@ namespace SRecall
                 MainMenu.Detector = Detector.SetupMenu(menu);
                 mainMenu.UpdateDirEntry(ref MainMenu.Recall, Recall.SetupMenu(MainMenu.Detector.Menu));
 
-                if (newMenu)
+                var globalMenu = Menu.GetSubMenu(menu, "SAssembliesDetectorsRecall");
+                if (globalMenu == null)
                 {
                     Menu.GlobalSettings.Menu =
                     menu.AddSubMenu(new LeagueSharp.Common.Menu("Global Settings", "SAwarenessGlobalSettings"));
@@ -91,7 +92,10 @@ namespace SRecall
                         new MenuItem("SAssembliesGlobalSettingsServerChatPingActive", "Server Chat/Ping").SetValue(false));
                     Menu.GlobalSettings.Menu.AddItem(
                         new MenuItem("SAssembliesGlobalSettingsVoiceVolume", "Voice Volume").SetValue(new Slider(100, 0, 100)));
+                }
 
+                if (newMenu)
+                {
                     menu.AddItem(new MenuItem("By Screeder", "By Screeder V" + Assembly.GetExecutingAssembly().GetName().Version));
                     menu.AddToMainMenu();
                 }
