@@ -68,9 +68,18 @@ namespace SAssemblies.Miscs
             var reader = new BinaryReader(new MemoryStream(args.PacketData));
 
             byte packetId = reader.ReadByte();
-            if (packetId == 36 || packetId == 21)
+            List<int> packetIds = new List<int>();
+            if (Game.Version.Contains("5.24"))
             {
-                args.Process = false;
+                packetIds.Add(21);
+                packetIds.Add(36);
+            }
+            foreach (int id in packetIds)
+            {
+                if (packetId == id)
+                {
+                    args.Process = false;
+                }
             }
         }
     }

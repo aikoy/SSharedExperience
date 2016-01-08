@@ -1787,36 +1787,37 @@ namespace SAssemblies
         }
     }
 
+    [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
     internal static class Speech
     {
         private static Dictionary<int, SpeechSynthesizer> tts = new Dictionary<int, SpeechSynthesizer>();
 
         static Speech()
         {
-            //for (int i = 0; i < 4; i++)
-            //{
-            //    tts.Add(i, new SpeechSynthesizer());
-            //}
+            for (int i = 0; i < 4; i++)
+            {
+                tts.Add(i, new SpeechSynthesizer());
+            }
 
-            //ReadOnlyCollection<InstalledVoice> list = tts[0].GetInstalledVoices();
-            //String strVoice = "";
-            //foreach (var voice in list)
-            //{
-            //    if (voice.VoiceInfo.Culture.EnglishName.Contains("English") && voice.Enabled)
-            //    {
-            //        strVoice = voice.VoiceInfo.Name;
-            //    }
-            //}
+            ReadOnlyCollection<InstalledVoice> list = tts[0].GetInstalledVoices();
+            String strVoice = "";
+            foreach (var voice in list)
+            {
+                if (voice.VoiceInfo.Culture.EnglishName.Contains("English") && voice.Enabled)
+                {
+                    strVoice = voice.VoiceInfo.Name;
+                }
+            }
 
-            //foreach (KeyValuePair<int, SpeechSynthesizer> speech in tts)
-            //{
-            //    if (!strVoice.Equals(""))
-            //    {
-            //        speech.Value.SelectVoice(strVoice);
-            //    }
-            //}
-            //AppDomain.CurrentDomain.DomainUnload += CurrentDomainOnDomainUnload;
-            //AppDomain.CurrentDomain.ProcessExit += CurrentDomainOnDomainUnload;
+            foreach (KeyValuePair<int, SpeechSynthesizer> speech in tts)
+            {
+                if (!strVoice.Equals(""))
+                {
+                    speech.Value.SelectVoice(strVoice);
+                }
+            }
+            AppDomain.CurrentDomain.DomainUnload += CurrentDomainOnDomainUnload;
+            AppDomain.CurrentDomain.ProcessExit += CurrentDomainOnDomainUnload;
         }
 
         private static void CurrentDomainOnDomainUnload(object sender, EventArgs e)
@@ -1833,31 +1834,31 @@ namespace SAssemblies
 
         public static void Speak(String text)
         {
-            //bool speaking = false;
-            //foreach (var speech in tts)
-            //{
-            //    if (speech.Value.State == SynthesizerState.Ready && !speaking)
-            //    {
-            //        if (speech.Value.Volume !=
-            //            Menu.GlobalSettings.GetMenuItem("SAssembliesGlobalSettingsVoiceVolume")
-            //                .GetValue<Slider>()
-            //                .Value)
-            //        {
-            //            speech.Value.Volume =
-            //                Menu.GlobalSettings.GetMenuItem("SAssembliesGlobalSettingsVoiceVolume")
-            //                    .GetValue<Slider>()
-            //                    .Value;
-            //        }
-            //        speaking = true;
-            //        speech.Value.SpeakAsync(text);
-            //    }
-            //    else if (speech.Value.State != SynthesizerState.Ready)
-            //    {
-            //        speech.Value.Pause();
-            //        speech.Value.Volume = 1;
-            //        speech.Value.Resume();
-            //    }
-            //}
+            bool speaking = false;
+            foreach (var speech in tts)
+            {
+                if (speech.Value.State == SynthesizerState.Ready && !speaking)
+                {
+                    if (speech.Value.Volume !=
+                        Menu.GlobalSettings.GetMenuItem("SAssembliesGlobalSettingsVoiceVolume")
+                            .GetValue<Slider>()
+                            .Value)
+                    {
+                        speech.Value.Volume =
+                            Menu.GlobalSettings.GetMenuItem("SAssembliesGlobalSettingsVoiceVolume")
+                                .GetValue<Slider>()
+                                .Value;
+                    }
+                    speaking = true;
+                    speech.Value.SpeakAsync(text);
+                }
+                else if (speech.Value.State != SynthesizerState.Ready)
+                {
+                    speech.Value.Pause();
+                    speech.Value.Volume = 1;
+                    speech.Value.Resume();
+                }
+            }
         }
     }
 
