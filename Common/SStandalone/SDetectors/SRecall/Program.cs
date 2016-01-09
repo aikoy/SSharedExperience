@@ -93,6 +93,10 @@ namespace SRecall
                     Menu.GlobalSettings.Menu.AddItem(
                         new MenuItem("SAssembliesGlobalSettingsVoiceVolume", "Voice Volume").SetValue(new Slider(100, 0, 100)));
                 }
+                else
+                {
+                    Menu.GlobalSettings.Menu = globalMenu;
+                }
 
                 if (newMenu)
                 {
