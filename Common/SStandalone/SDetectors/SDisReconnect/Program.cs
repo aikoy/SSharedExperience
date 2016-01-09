@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SRecall
+namespace SDisReconnect
 {
     using System.Drawing;
     using System.Reflection;
@@ -21,13 +21,13 @@ namespace SRecall
         private readonly Dictionary<SAssemblies.Menu.MenuItemSettings, Func<dynamic>> MenuEntries;
 
         public static MenuItemSettings Detector = new MenuItemSettings();
-        public static SAssemblies.Menu.MenuItemSettings Recall = new SAssemblies.Menu.MenuItemSettings();
+        public static SAssemblies.Menu.MenuItemSettings DisReconnect = new SAssemblies.Menu.MenuItemSettings();
 
         public MainMenu()
         {
             MenuEntries = new Dictionary<SAssemblies.Menu.MenuItemSettings, Func<dynamic>>
                               {
-                                  { Recall, () => new Recall() },
+                                  { DisReconnect, () => new DisReconnect() },
                               };
         }
 
@@ -81,7 +81,7 @@ namespace SRecall
                 }
 
                 MainMenu.Detector = Detector.SetupMenu(menu);
-                mainMenu.UpdateDirEntry(ref MainMenu.Recall, Recall.SetupMenu(MainMenu.Detector.Menu));
+                mainMenu.UpdateDirEntry(ref MainMenu.DisReconnect, DisReconnect.SetupMenu(MainMenu.Detector.Menu));
 
                 var globalMenu = Menu.GetSubMenu(menu, "SAwarenessGlobalSettings");
                 if (globalMenu == null)
@@ -110,7 +110,7 @@ namespace SRecall
         private void Game_OnGameLoad(EventArgs args)
         {
             CreateMenu();
-            Common.ShowNotification("SRecallDetector loaded!", Color.LawnGreen, 5000);
+            Common.ShowNotification("SDisReconnectDetector loaded!", Color.LawnGreen, 5000);
         }
     }
 }

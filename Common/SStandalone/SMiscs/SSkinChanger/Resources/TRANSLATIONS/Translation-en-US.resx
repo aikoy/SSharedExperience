@@ -804,4 +804,76 @@
   <data name="TRACKERS_CLONE_DOUBLE" xml:space="preserve">
     <value>Double Circles</value>
   </data>
+  <data name="CHAMPIONS_CHAMPION_COMBO" xml:space="preserve">
+    <value>Combo</value>
+  </data>
+  <data name="CHAMPIONS_CHAMPION_DRAW" xml:space="preserve">
+    <value>Draw Spell</value>
+  </data>
+  <data name="CHAMPIONS_CHAMPION_E" xml:space="preserve">
+    <value>E</value>
+  </data>
+  <data name="CHAMPIONS_CHAMPION_FARM" xml:space="preserve">
+    <value>Farm</value>
+  </data>
+  <data name="CHAMPIONS_CHAMPION_FARM_JUNGLE" xml:space="preserve">
+    <value>Jungle</value>
+  </data>
+  <data name="CHAMPIONS_CHAMPION_FARM_LANE" xml:space="preserve">
+    <value>Lane</value>
+  </data>
+  <data name="CHAMPIONS_CHAMPION_FARM_LASTHIT" xml:space="preserve">
+    <value>Lasthit</value>
+  </data>
+  <data name="CHAMPIONS_CHAMPION_FLEE" xml:space="preserve">
+    <value>Flee</value>
+  </data>
+  <data name="CHAMPIONS_CHAMPION_HARASS" xml:space="preserve">
+    <value>Harass</value>
+  </data>
+  <data name="CHAMPIONS_CHAMPION_INTERRUPT" xml:space="preserve">
+    <value>Interrupt</value>
+  </data>
+  <data name="CHAMPIONS_CHAMPION_ITEMS" xml:space="preserve">
+    <value>Items</value>
+  </data>
+  <data name="CHAMPIONS_CHAMPION_KILLSTEAL" xml:space="preserve">
+    <value>Killsteal</value>
+  </data>
+  <data name="CHAMPIONS_CHAMPION_MAIN" xml:space="preserve">
+    <value>Champions</value>
+  </data>
+  <data name="CHAMPIONS_CHAMPION_ORBWALKER" xml:space="preserve">
+    <value>Orbwalker</value>
+  </data>
+  <data name="CHAMPIONS_CHAMPION_Q" xml:space="preserve">
+    <value>Q</value>
+  </data>
+  <data name="CHAMPIONS_CHAMPION_R" xml:space="preserve">
+    <value>R</value>
+  </data>
+  <data name="CHAMPIONS_CHAMPION_TROLL" xml:space="preserve">
+    <value>Troll</value>
+  </data>
+  <data name="CHAMPIONS_CHAMPION_W" xml:space="preserve">
+    <value>W</value>
+  </data>
+  <data name="CHAMPIONS_TAHMKENCH_E_SHIELD" xml:space="preserve">
+    <value>Use Shield</value>
+  </data>
+  <data name="CHAMPIONS_TAHMKENCH_E_SHIELD_PERCENT" xml:space="preserve">
+    <value>At % HP</value>
+  </data>
+  <data name="CHAMPIONS_TAHMKENCH_FLEE_ALLY" xml:space="preserve">
+    <value>Flee with ally</value>
+  </data>
+  <data name="CHAMPIONS_TAHMKENCH_FLEE_ALLY_RANGE" xml:space="preserve">
+    <value>Ally Range</value>
+  </data>
+  <data name="CHAMPIONS_TAHMKENCH_MAIN" xml:space="preserve">
+    <value>Tahm Kench</value>
+  </data>
+  <data name="CHAMPIONS_TAHMKENCH_W_MAXMOVE" xml:space="preserve">
+    <value>Max Movement Range</value>
+  </data>
 </root>

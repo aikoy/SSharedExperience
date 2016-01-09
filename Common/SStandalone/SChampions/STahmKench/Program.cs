@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SRecall
+namespace STahmKench
 {
     using System.Drawing;
     using System.Reflection;
@@ -12,7 +12,7 @@ namespace SRecall
     using LeagueSharp.Common;
 
     using SAssemblies;
-    using SAssemblies.Detectors;
+    using SAssemblies.Champions;
 
     using Menu = SAssemblies.Menu;
 
@@ -20,19 +20,23 @@ namespace SRecall
     {
         private readonly Dictionary<SAssemblies.Menu.MenuItemSettings, Func<dynamic>> MenuEntries;
 
-        public static MenuItemSettings Detector = new MenuItemSettings();
-        public static SAssemblies.Menu.MenuItemSettings Recall = new SAssemblies.Menu.MenuItemSettings();
+        public static MenuItemSettings Champion = new MenuItemSettings();
+        public static SAssemblies.Menu.MenuItemSettings TahmKench = new SAssemblies.Menu.MenuItemSettings();
 
         public MainMenu()
         {
             MenuEntries = new Dictionary<SAssemblies.Menu.MenuItemSettings, Func<dynamic>>
                               {
-                                  { Recall, () => new Recall() },
+                                  { TahmKench, () => new TahmKench() },
                               };
         }
 
         public void UpdateDirEntry(ref SAssemblies.Menu.MenuItemSettings oldMenuItem, SAssemblies.Menu.MenuItemSettings newMenuItem)
         {
+            if (newMenuItem == null)
+            {
+                return;
+            }
             Func<dynamic> save = MenuEntries[oldMenuItem];
             MenuEntries.Remove(oldMenuItem);
             MenuEntries.Add(newMenuItem, save);
@@ -80,19 +84,8 @@ namespace SRecall
                     menu = Menu.GetMenu("SAssembliesRoot");
                 }
 
-                MainMenu.Detector = Detector.SetupMenu(menu);
-                mainMenu.UpdateDirEntry(ref MainMenu.Recall, Recall.SetupMenu(MainMenu.Detector.Menu));
-
-                var globalMenu = Menu.GetSubMenu(menu, "SAwarenessGlobalSettings");
-                if (globalMenu == null)
-                {
-                    Menu.GlobalSettings.Menu =
-                    menu.AddSubMenu(new LeagueSharp.Common.Menu("Global Settings", "SAwarenessGlobalSettings"));
-                    Menu.GlobalSettings.Menu.AddItem(
-                        new MenuItem("SAssembliesGlobalSettingsServerChatPingActive", "Server Chat/Ping").SetValue(false));
-                    Menu.GlobalSettings.Menu.AddItem(
-                        new MenuItem("SAssembliesGlobalSettingsVoiceVolume", "Voice Volume").SetValue(new Slider(100, 0, 100)));
-                }
+                MainMenu.Champion = Champion.SetupMenu(menu);
+                mainMenu.UpdateDirEntry(ref MainMenu.TahmKench, TahmKench.SetupMenu(MainMenu.Champion.Menu));
 
                 if (newMenu)
                 {
@@ -110,7 +103,7 @@ namespace SRecall
         private void Game_OnGameLoad(EventArgs args)
         {
             CreateMenu();
-            Common.ShowNotification("SRecallDetector loaded!", Color.LawnGreen, 5000);
+            Common.ShowNotification("STahmKench loaded!", Color.LawnGreen, 5000);
         }
     }
 }
