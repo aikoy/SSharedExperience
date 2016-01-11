@@ -35,73 +35,6 @@ namespace SAssemblies.Champions
             Obj_AI_Hero.OnBuffRemove += Obj_AI_Hero_OnBuffRemove;
             Obj_AI_Hero.OnLevelUp += Obj_AI_Hero_OnLevelUp;
             Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
-
-            Drawing.OnDraw += args => Drawing.DrawText(500, 500, Color.AliceBlue, swallowedUnit.ToString());
-        }
-
-        private void Obj_AI_Hero_OnLevelUp(Obj_AI_Base sender, EventArgs args)
-        {
-            switch (CustomSpell.R.Level)
-            {
-                case 2:
-                    CustomSpell.R.Range = 5500;
-                    break;
-
-                case 3:
-                    CustomSpell.R.Range = 6000;
-                    break;
-            }
-        }
-
-        private void Obj_AI_Hero_OnBuffAdd(Obj_AI_Base sender, Obj_AI_BaseBuffAddEventArgs args)
-        {
-            if (args.Buff.Name.Equals(tahmEatingPassive))
-            {
-                lastPosBeforeSwallowing = ObjectManager.Player.Position;
-                var hero = sender as Obj_AI_Hero;
-                if (hero != null)
-                {
-                    if (hero.IsAlly)
-                    {
-                        swallowedUnit = SwallowedUnit.Ally;
-                    }
-                    else
-                    {
-                        swallowedUnit = SwallowedUnit.Enemy;
-                    }
-                    return;
-                }
-                var minion = sender as Obj_AI_Minion;
-                if (minion != null)
-                {
-                    swallowedUnit = SwallowedUnit.Minion;
-                }
-            }
-            else if (args.Buff.Name.Equals(tahmEatPassive.ToLower()) && !swallowedUnit.HasFlag(SwallowedUnit.Enemy | SwallowedUnit.Ally))
-            {
-                lastPosBeforeSwallowing = ObjectManager.Player.Position;
-                var hero = sender as Obj_AI_Hero;
-                if (hero != null)
-                {
-                    if (hero.IsAlly)
-                    {
-                        swallowedUnit = SwallowedUnit.Ally;
-                    }
-                }
-            }
-        }
-
-        private void Obj_AI_Hero_OnBuffRemove(Obj_AI_Base sender, Obj_AI_BaseBuffRemoveEventArgs args)
-        {
-            if (!sender.IsMe)
-            {
-                return;
-            }
-            if (args.Buff.Name.Equals(tahmEatPassive.ToLower()))
-            {
-                swallowedUnit = SwallowedUnit.None;
-                lastPosBeforeSwallowing = Vector3.Zero;
-            }
         }
 
         ~TahmKench()
@@ -173,8 +106,9 @@ namespace SAssemblies.Champions
                 var eMenu = TahmKenchChampion.Menu.AddSubMenu(new LeagueSharp.Common.Menu(Language.GetString("CHAMPIONS_CHAMPION_E"), "SAssembliesChampionsTahmKenchE"));
                 eMenu.AddItem(new MenuItem("SAssembliesChampionsTahmKenchEShield", Language.GetString("CHAMPIONS_TAHMKENCH_E_SHIELD")).SetValue(true));
                 eMenu.AddItem(new MenuItem("SAssembliesChampionsTahmKenchEShieldPercent", Language.GetString("CHAMPIONS_TAHMKENCH_E_SHIELD_PERCENT")).SetValue(new Slider(20, 1, 99)));
-                //var rMenu = TahmKenchChampion.Menu.AddSubMenu(new LeagueSharp.Common.Menu(Language.GetString("CHAMPIONS_CHAMPION_R"), "SAssembliesChampionsTahmKenchR"));
+                var rMenu = TahmKenchChampion.Menu.AddSubMenu(new LeagueSharp.Common.Menu(Language.GetString("CHAMPIONS_CHAMPION_R"), "SAssembliesChampionsTahmKenchR"));
                 //rMenu.AddItem(new MenuItem("SAssembliesChampionsTahmKenchR", Language.GetString("GLOBAL_KEY")).SetValue(new KeyBind('U', KeyBindType.Press)));
+                rMenu.AddItem(new MenuItem("SAssembliesChampionsTahmKenchRDraw", Language.GetString("CHAMPIONS_CHAMPION_DRAW")).SetValue(true));
                 //var itemsMenu = TahmKenchChampion.Menu.AddSubMenu(new LeagueSharp.Common.Menu(Language.GetString("CHAMPIONS_CHAMPION_ITEMS"), "SAssembliesChampionsTahmKenchItems"));
                 var trollMenu = TahmKenchChampion.Menu.AddSubMenu(new LeagueSharp.Common.Menu(Language.GetString("CHAMPIONS_CHAMPION_TROLL"), "SAssembliesChampionsTahmKenchTroll"));
                 trollMenu.AddItem(new MenuItem("SAssembliesChampionsTahmKenchTrollW", Language.GetString("GLOBAL_KEY")).SetValue(new KeyBind('I', KeyBindType.Press)));
@@ -230,6 +164,71 @@ namespace SAssemblies.Champions
             Ally,
             Enemy,
             Minion
+        }
+
+        private void Obj_AI_Hero_OnLevelUp(Obj_AI_Base sender, EventArgs args)
+        {
+            switch (CustomSpell.R.Level)
+            {
+                case 2:
+                    CustomSpell.R.Range = 5500;
+                    break;
+
+                case 3:
+                    CustomSpell.R.Range = 6000;
+                    break;
+            }
+        }
+
+        private void Obj_AI_Hero_OnBuffAdd(Obj_AI_Base sender, Obj_AI_BaseBuffAddEventArgs args)
+        {
+            if (args.Buff.Name.Equals(tahmEatingPassive))
+            {
+                lastPosBeforeSwallowing = ObjectManager.Player.Position;
+                var hero = sender as Obj_AI_Hero;
+                if (hero != null)
+                {
+                    if (hero.IsAlly)
+                    {
+                        swallowedUnit = SwallowedUnit.Ally;
+                    }
+                    else
+                    {
+                        swallowedUnit = SwallowedUnit.Enemy;
+                    }
+                    return;
+                }
+                var minion = sender as Obj_AI_Minion;
+                if (minion != null)
+                {
+                    swallowedUnit = SwallowedUnit.Minion;
+                }
+            }
+            else if (args.Buff.Name.Equals(tahmEatPassive.ToLower()) && !swallowedUnit.HasFlag(SwallowedUnit.Enemy | SwallowedUnit.Ally))
+            {
+                lastPosBeforeSwallowing = ObjectManager.Player.Position;
+                var hero = sender as Obj_AI_Hero;
+                if (hero != null)
+                {
+                    if (hero.IsAlly)
+                    {
+                        swallowedUnit = SwallowedUnit.Ally;
+                    }
+                }
+            }
+        }
+
+        private void Obj_AI_Hero_OnBuffRemove(Obj_AI_Base sender, Obj_AI_BaseBuffRemoveEventArgs args)
+        {
+            if (!sender.IsMe)
+            {
+                return;
+            }
+            if (args.Buff.Name.Equals(tahmEatPassive.ToLower()))
+            {
+                swallowedUnit = SwallowedUnit.None;
+                lastPosBeforeSwallowing = Vector3.Zero;
+            }
         }
 
         private void Interrupter2_OnInterruptableTarget(
@@ -357,6 +356,12 @@ namespace SAssemblies.Champions
                 {
                     Render.Circle.DrawCircle(ObjectManager.Player.Position, CustomSpell.W2.Range, Color.BlueViolet);
                 }
+            }
+            if (TahmKenchChampion.GetSubMenu("SAssembliesChampionsTahmKenchR")
+                    .Item("SAssembliesChampionsTahmKenchRDraw")
+                    .GetValue<bool>())
+            {
+                Render.Circle.DrawCircle(ObjectManager.Player.Position, CustomSpell.R.Range, Color.CadetBlue);
             }
 
             if (TahmKenchChampion.GetSubMenu("SAssembliesChampionsTahmKenchW")
