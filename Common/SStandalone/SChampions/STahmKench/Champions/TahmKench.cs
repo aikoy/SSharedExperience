@@ -29,20 +29,22 @@ namespace SAssemblies.Champions
 
         public TahmKench()
         {
-            Game.OnUpdate += Game_OnGameUpdate;
-            Drawing.OnEndScene += Drawing_OnEndScene;
-            Obj_AI_Hero.OnBuffAdd += Obj_AI_Hero_OnBuffAdd;
-            Obj_AI_Hero.OnBuffRemove += Obj_AI_Hero_OnBuffRemove;
-            Obj_AI_Hero.OnLevelUp += Obj_AI_Hero_OnLevelUp;
-            Interrupter2.OnInterruptableTarget += Interrupter2_OnInterruptableTarget;
+            Game.OnUpdate += this.Game_OnGameUpdate;
+            Drawing.OnEndScene += this.Drawing_OnEndScene;
+            Obj_AI_Base.OnBuffAdd += this.Obj_AI_Hero_OnBuffAdd;
+            Obj_AI_Base.OnBuffRemove += this.Obj_AI_Hero_OnBuffRemove;
+            Obj_AI_Base.OnLevelUp += this.Obj_AI_Hero_OnLevelUp;
+            Interrupter2.OnInterruptableTarget += this.Interrupter2_OnInterruptableTarget;
         }
 
         ~TahmKench()
         {
-            Game.OnUpdate -= Game_OnGameUpdate;
-            Drawing.OnEndScene -= Drawing_OnEndScene;
-            Obj_AI_Hero.OnBuffAdd -= Obj_AI_Hero_OnBuffAdd;
-            Obj_AI_Hero.OnBuffRemove -= Obj_AI_Hero_OnBuffRemove;
+            Game.OnUpdate -= this.Game_OnGameUpdate;
+            Drawing.OnEndScene -= this.Drawing_OnEndScene;
+            Obj_AI_Base.OnBuffAdd -= this.Obj_AI_Hero_OnBuffAdd;
+            Obj_AI_Base.OnBuffRemove -= this.Obj_AI_Hero_OnBuffRemove;
+            Obj_AI_Base.OnLevelUp -= this.Obj_AI_Hero_OnLevelUp;
+            Interrupter2.OnInterruptableTarget -= this.Interrupter2_OnInterruptableTarget;
         }
 
         public static bool IsActive()
@@ -182,37 +184,37 @@ namespace SAssemblies.Champions
 
         private void Obj_AI_Hero_OnBuffAdd(Obj_AI_Base sender, Obj_AI_BaseBuffAddEventArgs args)
         {
-            if (args.Buff.Name.Equals(tahmEatingPassive))
+            if (args.Buff.Name.Equals(this.tahmEatingPassive))
             {
-                lastPosBeforeSwallowing = ObjectManager.Player.Position;
+                this.lastPosBeforeSwallowing = ObjectManager.Player.Position;
                 var hero = sender as Obj_AI_Hero;
                 if (hero != null)
                 {
                     if (hero.IsAlly)
                     {
-                        swallowedUnit = SwallowedUnit.Ally;
+                        this.swallowedUnit = SwallowedUnit.Ally;
                     }
                     else
                     {
-                        swallowedUnit = SwallowedUnit.Enemy;
+                        this.swallowedUnit = SwallowedUnit.Enemy;
                     }
                     return;
                 }
                 var minion = sender as Obj_AI_Minion;
                 if (minion != null)
                 {
-                    swallowedUnit = SwallowedUnit.Minion;
+                    this.swallowedUnit = SwallowedUnit.Minion;
                 }
             }
-            else if (args.Buff.Name.Equals(tahmEatPassive.ToLower()) && !swallowedUnit.HasFlag(SwallowedUnit.Enemy | SwallowedUnit.Ally))
+            else if (args.Buff.Name.Equals(this.tahmEatPassive.ToLower()) && !this.swallowedUnit.HasFlag(SwallowedUnit.Enemy | SwallowedUnit.Ally))
             {
-                lastPosBeforeSwallowing = ObjectManager.Player.Position;
+                this.lastPosBeforeSwallowing = ObjectManager.Player.Position;
                 var hero = sender as Obj_AI_Hero;
                 if (hero != null)
                 {
                     if (hero.IsAlly)
                     {
-                        swallowedUnit = SwallowedUnit.Ally;
+                        this.swallowedUnit = SwallowedUnit.Ally;
                     }
                 }
             }
@@ -224,10 +226,10 @@ namespace SAssemblies.Champions
             {
                 return;
             }
-            if (args.Buff.Name.Equals(tahmEatPassive.ToLower()))
+            if (args.Buff.Name.Equals(this.tahmEatPassive.ToLower()))
             {
-                swallowedUnit = SwallowedUnit.None;
-                lastPosBeforeSwallowing = Vector3.Zero;
+                this.swallowedUnit = SwallowedUnit.None;
+                this.lastPosBeforeSwallowing = Vector3.Zero;
             }
         }
 
@@ -235,7 +237,7 @@ namespace SAssemblies.Champions
             Obj_AI_Hero unit,
             Interrupter2.InterruptableTargetEventArgs args)
         {
-            switch (unit.GetBuffCount(tahmPassive))
+            switch (unit.GetBuffCount(this.tahmPassive))
             {
                 case 1:
                     if (TahmKenchChampion.GetSubMenu("SAssembliesChampionsTahmKenchQ")
@@ -246,11 +248,11 @@ namespace SAssemblies.Champions
                                .GetValue<bool>())
                     {
                         if (Orbwalking.InAutoAttackRange(unit) && CustomSpell.Q.IsReady() && (CustomSpell.W.IsReady()
-                            && swallowedUnit == SwallowedUnit.None))
+                            && this.swallowedUnit == SwallowedUnit.None))
                         {
                             ObjectManager.Player.IssueOrder(GameObjectOrder.AttackUnit, unit);
-                            CustomSpell.Q.Cast(unit);
-                            CustomSpell.W.CastOnUnit(unit);
+                            Utility.DelayAction.Add(100, () => CustomSpell.Q.Cast(unit));
+                            Utility.DelayAction.Add(200, () => CustomSpell.W.CastOnUnit(unit));
                         }
                     }
                     break;
@@ -260,7 +262,7 @@ namespace SAssemblies.Champions
                             .Item("SAssembliesChampionsTahmKenchQInterrupt")
                             .GetValue<bool>()) || (CustomSpell.W.IsReady() && TahmKenchChampion.GetSubMenu("SAssembliesChampionsTahmKenchW")
                                .Item("SAssembliesChampionsTahmKenchWInterrupt")
-                               .GetValue<bool>() && swallowedUnit == SwallowedUnit.None))
+                               .GetValue<bool>() && this.swallowedUnit == SwallowedUnit.None))
                     {
                         if (Orbwalking.InAutoAttackRange(unit))
                         {
@@ -287,7 +289,7 @@ namespace SAssemblies.Champions
                             .Item("SAssembliesChampionsTahmKenchQInterrupt")
                             .GetValue<bool>()) || (CustomSpell.W.IsReady() && TahmKenchChampion.GetSubMenu("SAssembliesChampionsTahmKenchW")
                                .Item("SAssembliesChampionsTahmKenchWInterrupt")
-                               .GetValue<bool>() && swallowedUnit == SwallowedUnit.None))
+                               .GetValue<bool>() && this.swallowedUnit == SwallowedUnit.None))
                     {
                         if (CustomSpell.Q.IsReady())
                         {
@@ -309,26 +311,26 @@ namespace SAssemblies.Champions
 
             this.Killsteal();
             this.Shield();
-            SaveAlly();
-            TrollMode();
+            this.SaveAlly();
+            this.TrollMode();
 
             switch (orbwalker.ActiveMode)
             {
                 case Orbwalking.OrbwalkingMode.Combo:
-                    Combo();
+                    this.Combo();
                     break;
 
                 case Orbwalking.OrbwalkingMode.Mixed:
-                    Harass();
+                    this.Harass();
                     break;
 
                 case Orbwalking.OrbwalkingMode.LaneClear:
-                    LaneClear();
-                    JungleClear();
+                    this.LaneClear();
+                    this.JungleClear();
                     break;
 
                 case Orbwalking.OrbwalkingMode.LastHit:
-                    LastHit();
+                    this.LastHit();
                     break;
             }
         }
@@ -348,7 +350,7 @@ namespace SAssemblies.Champions
                     .Item("SAssembliesChampionsTahmKenchWDraw")
                     .GetValue<bool>())
             {
-                if (swallowedUnit != SwallowedUnit.Minion)
+                if (this.swallowedUnit != SwallowedUnit.Minion)
                 {
                     Render.Circle.DrawCircle(ObjectManager.Player.Position, CustomSpell.W.Range, Color.BlueViolet);
                 }
@@ -368,16 +370,16 @@ namespace SAssemblies.Champions
                     .Item("SAssembliesChampionsTahmKenchWDrawMax")
                     .GetValue<bool>())
             {
-                if (swallowedUnit == SwallowedUnit.Enemy)
+                if (this.swallowedUnit == SwallowedUnit.Enemy)
                 {
-                    BuffInstance buff = ObjectManager.Player.GetBuff(tahmEatPassive.ToLower());
+                    BuffInstance buff = ObjectManager.Player.GetBuff(this.tahmEatPassive.ToLower());
                     if (buff != null)
                     {
                         float time = buff.EndTime - buff.StartTime;
-                        float xPos = lastPosBeforeSwallowing.X + ((time) * ObjectManager.Player.MoveSpeed);
-                        float radius = Math.Abs(lastPosBeforeSwallowing.X - xPos);
+                        float xPos = this.lastPosBeforeSwallowing.X + ((time) * ObjectManager.Player.MoveSpeed);
+                        float radius = Math.Abs(this.lastPosBeforeSwallowing.X - xPos);
                         Console.WriteLine(radius);
-                        Render.Circle.DrawCircle(lastPosBeforeSwallowing, radius, Color.Aqua);
+                        Render.Circle.DrawCircle(this.lastPosBeforeSwallowing, radius, Color.Aqua);
                     }
                 }
             }
@@ -392,12 +394,12 @@ namespace SAssemblies.Champions
 
             if (target != null)
             {
-                var buffCount = target.GetBuffCount(tahmPassive);
+                var buffCount = target.GetBuffCount(this.tahmPassive);
                 switch (buffCount)
                 {
                     case 3:
                         if (CustomSpell.W.IsReady()
-                            && swallowedUnit == SwallowedUnit.None
+                            && this.swallowedUnit == SwallowedUnit.None
                             && target.Distance(ObjectManager.Player) <= CustomSpell.W.Range
                             && TahmKenchChampion.GetSubMenu("SAssembliesChampionsTahmKenchCombo")
                                    .Item("SAssembliesChampionsTahmKenchComboW")
@@ -427,11 +429,11 @@ namespace SAssemblies.Champions
                             {
                                 break;
                             }
-                            if (swallowedUnit == SwallowedUnit.None && closestMinion != null)
+                            if (this.swallowedUnit == SwallowedUnit.None && closestMinion != null)
                             {
                                 CustomSpell.W.CastOnUnit(closestMinion);
                             }
-                            else if (swallowedUnit == SwallowedUnit.Minion)
+                            else if (this.swallowedUnit == SwallowedUnit.Minion)
                             {
                                 CustomSpell.W2.CastIfHitchanceEquals(target, HitChance.High);
                             }
@@ -448,7 +450,7 @@ namespace SAssemblies.Champions
                 }
             }
 
-            if (swallowedUnit == SwallowedUnit.Enemy
+            if (this.swallowedUnit == SwallowedUnit.Enemy
                     && TahmKenchChampion.GetSubMenu("SAssembliesChampionsTahmKenchW")
                         .Item("SAssembliesChampionsTahmKenchWAutoMoveToAlly")
                         .GetValue<bool>())
@@ -516,11 +518,11 @@ namespace SAssemblies.Champions
                 var target = TargetSelector.GetTarget(CustomSpell.W2.Range, TargetSelector.DamageType.Magical);
                 if (target != null)
                 {
-                    if (swallowedUnit == SwallowedUnit.None && closestMinion != null)
+                    if (this.swallowedUnit == SwallowedUnit.None && closestMinion != null)
                     {
                         CustomSpell.W.CastOnUnit(closestMinion);
                     }
-                    else if (swallowedUnit == SwallowedUnit.Minion)
+                    else if (this.swallowedUnit == SwallowedUnit.Minion)
                     {
                         CustomSpell.W2.CastIfHitchanceEquals(target, HitChance.High);
                     }
@@ -540,6 +542,7 @@ namespace SAssemblies.Champions
             {
                 return;
             }
+
             var minion = MinionManager.GetMinions(CustomSpell.Q.Range, MinionTypes.All, MinionTeam.NotAlly)
                     .FirstOrDefault(target => ObjectManager.Player.GetSpellDamage(target, SpellSlot.Q) >= target.Health);
 
@@ -592,7 +595,7 @@ namespace SAssemblies.Champions
                           .SubMenu("SAssembliesChampionsTahmKenchFarmLane")
                           .Item("SAssembliesChampionsTahmKenchFarmLaneMinMana")
                           .GetValue<Slider>()
-                          .Value && swallowedUnit != SwallowedUnit.Minion)
+                          .Value && this.swallowedUnit != SwallowedUnit.Minion)
                 {
                     return;
                 }
@@ -602,11 +605,11 @@ namespace SAssemblies.Champions
 
                 if (minion != null)
                 {
-                    if (swallowedUnit == SwallowedUnit.None && minion != null)
+                    if (this.swallowedUnit == SwallowedUnit.None && minion != null)
                     {
                         CustomSpell.W.CastOnUnit(minion);
                     }
-                    else if (swallowedUnit == SwallowedUnit.Minion && minions.Count > 0)
+                    else if (this.swallowedUnit == SwallowedUnit.Minion && minions.Count > 0)
                     {
                         CustomSpell.W2.Cast(CustomSpell.W2.GetCircularFarmLocation(minions).Position);
                     }
@@ -650,7 +653,7 @@ namespace SAssemblies.Champions
                           .SubMenu("SAssembliesChampionsTahmKenchFarmJungle")
                           .Item("SAssembliesChampionsTahmKenchFarmJungleMinMana")
                           .GetValue<Slider>()
-                          .Value && swallowedUnit != SwallowedUnit.Minion)
+                          .Value && this.swallowedUnit != SwallowedUnit.Minion)
                 {
                     return;
                 }
@@ -660,11 +663,11 @@ namespace SAssemblies.Champions
 
                 if (minion != null)
                 {
-                    if (swallowedUnit == SwallowedUnit.None && minion != null)
+                    if (this.swallowedUnit == SwallowedUnit.None && minion != null)
                     {
                         CustomSpell.W.CastOnUnit(minion);
                     }
-                    else if (swallowedUnit == SwallowedUnit.Minion && minions.Count > 0)
+                    else if (this.swallowedUnit == SwallowedUnit.Minion && minions.Count > 0)
                     {
                         CustomSpell.W2.Cast(CustomSpell.W2.GetCircularFarmLocation(minions).Position);
                     }
@@ -723,7 +726,7 @@ namespace SAssemblies.Champions
         {
             if (TahmKenchChampion.GetSubMenu("SAssembliesChampionsTahmKenchW")
                     .Item("SAssembliesChampionsTahmKenchWAutoShieldAlly")
-                    .GetValue<bool>() && swallowedUnit == SwallowedUnit.None
+                    .GetValue<bool>() && this.swallowedUnit == SwallowedUnit.None
                     && CustomSpell.W.IsReady())
             {
                 var target = HeroManager.Allies.FirstOrDefault(ally => !ally.IsMe && !ally.IsDead &&
@@ -763,13 +766,13 @@ namespace SAssemblies.Champions
                     .OrderBy(x => ObjectManager.Player.Distance(x.Position))
                     .FirstOrDefault(x => !x.IsMe && ObjectManager.Player.Distance(x.Position) < CustomSpell.W.Range + 200);
 
-                if (allyHero != null && swallowedUnit == SwallowedUnit.None)
+                if (allyHero != null && this.swallowedUnit == SwallowedUnit.None)
                 {
                     ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, allyHero.ServerPosition);
                     CustomSpell.W.CastOnUnit(allyHero);
                 }
 
-                if (swallowedUnit == SwallowedUnit.Ally)
+                if (this.swallowedUnit == SwallowedUnit.Ally)
                 {
                     Obj_AI_Base target = null;
                     if (hero != null && turret != null
