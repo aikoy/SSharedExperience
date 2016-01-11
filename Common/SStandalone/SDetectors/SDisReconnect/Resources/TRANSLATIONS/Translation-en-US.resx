@@ -874,6 +874,27 @@
     <value>Tahm Kench</value>
   </data>
   <data name="CHAMPIONS_TAHMKENCH_W_MAXMOVE" xml:space="preserve">
-    <value>Max Movement Range</value>
+    <value>Draw max Movement Range</value>
+  </data>
+  <data name="CHAMPIONS_CHAMPION_MANAPERCENT" xml:space="preserve">
+    <value>Min Mana percent</value>
+  </data>
+  <data name="CHAMPIONS_CHAMPION_TROLL_ENEMY_HERO" xml:space="preserve">
+    <value>Move to enemy Hero</value>
+  </data>
+  <data name="CHAMPIONS_CHAMPION_TROLL_ENEMY_TURRET" xml:space="preserve">
+    <value>Move to enemy Turret</value>
+  </data>
+  <data name="CHAMPIONS_TAHMKENCH_COMBO_WMAX" xml:space="preserve">
+    <value>Max stacks until w disabled</value>
+  </data>
+  <data name="CHAMPIONS_TAHMKENCH_W_AUTOMOVE" xml:space="preserve">
+    <value>Auto move to ally turret / hero</value>
+  </data>
+  <data name="CHAMPIONS_TAHMKENCH_W_AUTOSHIELD" xml:space="preserve">
+    <value>Auto shield ally</value>
+  </data>
+  <data name="CHAMPIONS_TAHMKENCH_W_SHIELD_PERCENT" xml:space="preserve">
+    <value>Auto shield ally hp percent</value>
   </data>
 </root>
