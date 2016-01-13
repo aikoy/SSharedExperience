@@ -115,7 +115,6 @@ namespace SAssemblies.Champions
                 var trollMenu = TahmKenchChampion.Menu.AddSubMenu(new LeagueSharp.Common.Menu(Language.GetString("CHAMPIONS_CHAMPION_TROLL"), "SAssembliesChampionsTahmKenchTroll"));
                 trollMenu.AddItem(new MenuItem("SAssembliesChampionsTahmKenchTrollW", Language.GetString("GLOBAL_KEY")).SetValue(new KeyBind('I', KeyBindType.Press)));
                 trollMenu.AddItem(new MenuItem("SAssembliesChampionsTahmKenchTrollWToEnemyHero", Language.GetString("CHAMPIONS_CHAMPION_TROLL_ENEMY_HERO")).SetValue(true));
-                trollMenu.AddItem(new MenuItem("SAssembliesChampionsTahmKenchTrollWToEnemyHero", Language.GetString("CHAMPIONS_CHAMPION_TROLL_ENEMY_HERO")).SetValue(true));
                 trollMenu.AddItem(new MenuItem("SAssembliesChampionsTahmKenchTrollWToEnemyTurret", Language.GetString("CHAMPIONS_CHAMPION_TROLL_ENEMY_TURRET")).SetValue(true));
                 //trollMenu.AddItem(new MenuItem("SAssembliesChampionsTahmKenchTrollWR", Language.GetString("GLOBAL_KEY")).SetValue(true));
                 TahmKenchChampion.CreateActiveMenuItem("SAssembliesChampionsTahmKenchActive", () => new TahmKench());
