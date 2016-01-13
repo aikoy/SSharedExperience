@@ -53,6 +53,8 @@ namespace SAssemblies.Miscs
 
         public EloDisplayer()
         {
+            Console.WriteLine(Game.Region);
+
             if (GetRegionPrefix().Equals(""))
                 return;
 
@@ -632,8 +634,20 @@ namespace SAssemblies.Miscs
                 case "oc1":
                     return "oce";
 
-                case "kr1":
-                    return "kr";
+                case "kr":
+                    return "www";
+
+                case "ru":
+                    return "ru";
+
+                case "na1":
+                    return "na";
+
+                case "br1":
+                    return "br";
+
+                case "tr1":
+                    return "tr";
 
                 case "sg1":
                     return "sg";
