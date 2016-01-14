@@ -53,8 +53,6 @@ namespace SAssemblies.Miscs
 
         public EloDisplayer()
         {
-            Console.WriteLine(Game.Region);
-
             if (GetRegionPrefix().Equals(""))
                 return;
 
@@ -77,7 +75,6 @@ namespace SAssemblies.Miscs
                 index++;
             }
 
-            //Game.OnUpdate += Game_OnGameUpdateAsyncTexts;
             new Thread(LoadSpritesAsync).Start();
             new Thread(LoadTextsAsync).Start();
             Game.OnWndProc += Game_OnWndProc;
