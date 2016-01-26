@@ -635,6 +635,7 @@ namespace SAssemblies.Miscs
                 return prefix + ".op.gg";
         }
 
+        //https://www.joduska.me/forum/topic/31648-ping-tester-for-every-region/
         public static String GetRegionPrefix()
         {
             //isAsia = true;

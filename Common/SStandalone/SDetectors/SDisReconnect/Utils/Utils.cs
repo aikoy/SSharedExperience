@@ -3049,14 +3049,14 @@ namespace SAssemblies
 
     static class PacketCatcher
     {
-        private static List<byte> exclude = new List<byte>() { };
+        private static List<byte> exclude = new List<byte>() {  };
         private static List<byte> list = new List<byte>() { }; 
 
         public static void Init()
         {
             Game.OnProcessPacket += delegate(GamePacketEventArgs eventArgs)
             {
-                if (!list.Contains(eventArgs.PacketData[0]) && !exclude.Contains(eventArgs.PacketData[0]) && eventArgs.PacketData.Length == 12)
+                if (!list.Contains(eventArgs.PacketData[0]) && !exclude.Contains(eventArgs.PacketData[0]))
                 {
                     list.Add(eventArgs.PacketData[0]);
                     Console.Write("Got Packet: " + eventArgs.PacketData[0] + "; Length: " + eventArgs.PacketData.Length + "; ");
