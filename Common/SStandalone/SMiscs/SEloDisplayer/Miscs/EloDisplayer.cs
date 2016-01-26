@@ -28,8 +28,6 @@ namespace SAssemblies.Miscs
     {
         public static Menu.MenuItemSettings EloDisplayerMisc = new Menu.MenuItemSettings(typeof(EloDisplayer));
 
-        private static SpriteHelper.SpriteInfo RunesSprite;
-
         private Dictionary<Obj_AI_Hero, ChampionEloDisplayer> _allies = new Dictionary<Obj_AI_Hero,ChampionEloDisplayer>();
         private Dictionary<Obj_AI_Hero, ChampionEloDisplayer> _enemies = new Dictionary<Obj_AI_Hero, ChampionEloDisplayer>();
         private Dictionary<Obj_AI_Hero, TeamEloDisplayer> _teams = new Dictionary<Obj_AI_Hero, TeamEloDisplayer>();
@@ -50,6 +48,8 @@ namespace SAssemblies.Miscs
         private bool FinishedLoadingComplete = false;
 
         private bool Loading = false;
+
+        private static bool isAsia = false;
 
         public EloDisplayer()
         {
@@ -75,8 +75,7 @@ namespace SAssemblies.Miscs
                 index++;
             }
 
-            new Thread(LoadSpritesAsync).Start();
-            new Thread(LoadTextsAsync).Start();
+            new Thread(LoadAsync).Start();
             Game.OnWndProc += Game_OnWndProc;
 
             EloDisplayerMisc.GetMenuItem("SAssembliesMiscsEloDisplayerScale").ValueChanged += EloDisplayer_ValueChanged;
@@ -84,7 +83,6 @@ namespace SAssemblies.Miscs
 
         ~EloDisplayer()
         {
-            Game.OnUpdate -= Game_OnGameUpdateAsyncTexts;
             Game.OnWndProc -= Game_OnWndProc;
         }
 
@@ -236,6 +234,9 @@ namespace SAssemblies.Miscs
             {
                 if (hero.Value.SummonerIcon != null && hero.Value.SummonerIcon.Sprite != null && hero.Value.SummonerIcon.Sprite.Bitmap != null)
                 {
+                    Console.WriteLine(hero.Value.SummonerIcon);
+                    Console.WriteLine(hero.Value.SummonerIcon.Sprite);
+                    Console.WriteLine(hero.Value.SummonerIcon.Sprite.Bitmap);
                     hero.Value.SummonerIcon.Position = new Vector2(70, yOffset + (index * hero.Value.SummonerIcon.Sprite.Bitmap.Height));
                     hero.Value.SummonerName.Position = new Vector2(hero.Value.SummonerIcon.Position.X + hero.Value.SummonerIcon.Sprite.Bitmap.Width + 10, hero.Value.SummonerIcon.Position.Y);
                     hero.Value.ChampionName.Position = new Vector2(hero.Value.SummonerName.Position.X, hero.Value.SummonerName.Position.Y + textFontSize);
@@ -396,6 +397,17 @@ namespace SAssemblies.Miscs
             }
         }
 
+        private void LoadAsync()
+        {
+            this.LoadSpritesAsync();
+            this.LoadTextsAsync();
+            if (!Loading && !FinishedLoadingComplete)
+            {
+                Loading = true;
+                new Thread(this.FinishedLoading).Start();
+            }
+        }
+
         private void LoadSpritesAsync()
         {
             bool finished = true;
@@ -409,10 +421,10 @@ namespace SAssemblies.Miscs
                         if (!ally.Value.SummonerIcon.WebsiteContent.Equals(""))
                         {
                             SpriteHelper.DownloadImageRiot(
-                            ally.Value.SummonerIcon.WebsiteContent,
-                            SpriteHelper.ChampionType.None,
-                            SpriteHelper.DownloadType.ProfileIcon,
-                            @"EloDisplayer\");
+                                ally.Value.SummonerIcon.WebsiteContent,
+                                SpriteHelper.ChampionType.None,
+                                SpriteHelper.DownloadType.ProfileIcon,
+                                @"EloDisplayer\");
                             ally.Value.SummonerIcon.Sprite = new SpriteHelper.SpriteInfo();
                             ally.Value.SummonerIcon.Sprite.Bitmap = SpriteHelper.SpecialBitmap.ResizeBitmap(SpriteHelper.SpecialBitmap.LoadBitmap(ally.Value.SummonerIcon.WebsiteContent, @"EloDisplayer\"), 0.35f);
                         }
@@ -435,10 +447,10 @@ namespace SAssemblies.Miscs
                         if (!enemy.Value.SummonerIcon.WebsiteContent.Equals(""))
                         {
                             SpriteHelper.DownloadImageRiot(
-                            enemy.Value.SummonerIcon.WebsiteContent,
-                            SpriteHelper.ChampionType.None,
-                            SpriteHelper.DownloadType.ProfileIcon,
-                            @"EloDisplayer\");
+                                enemy.Value.SummonerIcon.WebsiteContent,
+                                SpriteHelper.ChampionType.None,
+                                SpriteHelper.DownloadType.ProfileIcon,
+                                @"EloDisplayer\");
                             enemy.Value.SummonerIcon.Sprite = new SpriteHelper.SpriteInfo();
                             enemy.Value.SummonerIcon.Sprite.Bitmap = SpriteHelper.SpecialBitmap.ResizeBitmap(SpriteHelper.SpecialBitmap.LoadBitmap(enemy.Value.SummonerIcon.WebsiteContent, @"EloDisplayer\"), 0.35f);
                         }
@@ -541,11 +553,6 @@ namespace SAssemblies.Miscs
                     }
                 }
             } while (!finished);
-            if (finished && !Loading && !FinishedLoadingComplete)
-            {
-                Loading = true;
-                new Thread(this.FinishedLoading).Start();
-            }
         }
 
         public static String GetLolWebSiteContent(String webSite)
@@ -568,7 +575,14 @@ namespace SAssemblies.Miscs
         public static String GetLolWebSiteContentOverview(Obj_AI_Hero hero)
         {
             string playerName = GetEncodedPlayerName(hero);
-            return GetLolWebSiteContent("summoner/userName=" + playerName);
+            if (isAsia)
+            {
+                return GetLolWebSiteContent(playerName);
+            }
+            else
+            {
+                return GetLolWebSiteContent("summoner/userName=" + playerName);
+            }
         }
 
         private String GetLolWebSiteContentChampions(Obj_AI_Hero hero)
@@ -592,11 +606,16 @@ namespace SAssemblies.Miscs
         public static String GetEncodedPlayerName(Obj_AI_Hero hero)
         {
             return HttpUtility.UrlEncode(hero.Name);
+            //return HttpUtility.UrlEncode("Godfr3y"); //我又不玩沙皇 ranked //crudeliss lvl16 //Godfr3y unranked
         }
 
         public static String GetWebSite()
         {
             String prefix = GetRegionPrefix();
+            if (isAsia)
+            {
+                return "http://leagueofasia.com/historicaloverview.php?r=" + prefix + "&s=";
+            }
             if (prefix == "")
                 return "http://op.gg/";
             else
@@ -606,6 +625,10 @@ namespace SAssemblies.Miscs
         public static String GetWebSiteWithoutHttp()
         {
             String prefix = GetRegionPrefix();
+            if (isAsia)
+            {
+                return "leagueofasia.com";
+            }
             if (prefix == "")
                 return "op.gg";
             else
@@ -614,6 +637,8 @@ namespace SAssemblies.Miscs
 
         public static String GetRegionPrefix()
         {
+            //isAsia = true;
+            //return "sg";
             switch (Game.Region.ToLower())
             {
                 case "euw1":
@@ -646,22 +671,28 @@ namespace SAssemblies.Miscs
                 case "tr1":
                     return "tr";
 
-                case "sg1":
+                case "sg":
+                    isAsia = true;
                     return "sg";
 
-                case "vn1":
+                case "vn":
+                    isAsia = true;
                     return "vn";
 
-                case "ph1":
+                case "ph":
+                    isAsia = true;
                     return "ph";
 
-                case "tw1":
+                case "tw":
+                    isAsia = true;
                     return "tw";
 
-                case "th1":
+                case "th":
+                    isAsia = true;
                     return "th";
 
-                case "id1":
+                case "id":
+                    isAsia = true;
                     return "id";
 
                 default:
@@ -671,12 +702,43 @@ namespace SAssemblies.Miscs
 
         private String GetSummonerIcon(Obj_AI_Hero hero, ChampionEloDisplayer elo)
         {
+            if (isAsia)
+            {
+                return this.GetSummonerIconAsia(hero, elo);
+            }
+            else
+            {
+                return this.GetSummonerIconOpGg(hero, elo);
+            }
+        }
+
+        private String GetSummonerIconOpGg(Obj_AI_Hero hero, ChampionEloDisplayer elo)
+        {
             String websiteContent = elo.GetLolWebSiteContentOverview(hero);
             String patternWin = "<img src=\"//(.*?)op.gg/images/profile_icons/profileIcon(.*?).jpg\" class=\"ProfileImage\">";
             return Website.GetMatch(websiteContent, patternWin, 0, 2) + ".png";
         }
 
+        private String GetSummonerIconAsia(Obj_AI_Hero hero, ChampionEloDisplayer elo)
+        {
+            String websiteContent = elo.GetLolWebSiteContentOverview(hero);
+            String patternWin = "src=\"http://data.leagueofasia.com/(.*?)/icons/icon_(.*?)\"";
+            return Website.GetMatch(websiteContent, patternWin, 0, 2);
+        }
+
         private String GetDivision(Obj_AI_Hero hero, ChampionEloDisplayer elo, ref bool ranked)
+        {
+            if (isAsia)
+            {
+                return this.GetDivisionAsia(hero, elo, ref ranked);
+            }
+            else
+            {
+                return this.GetDivisionOpGg(hero, elo, ref ranked);
+            }
+        }
+
+        private String GetDivisionOpGg(Obj_AI_Hero hero, ChampionEloDisplayer elo, ref bool ranked)
         {
             if (!elo.Divison.WebsiteContent.Equals(""))
             {
@@ -720,7 +782,74 @@ namespace SAssemblies.Miscs
             return division;
         }
 
+        private String GetDivisionAsia(Obj_AI_Hero hero, ChampionEloDisplayer elo, ref bool ranked)
+        {
+            if (!elo.Divison.WebsiteContent.Equals(""))
+            {
+                return elo.Divison.WebsiteContent;
+            }
+            String division = "";
+            String websiteContent = elo.GetLolWebSiteContentOverview(hero);
+            String patternLevel = "<span class=\"profile-summoner-level\">LEVEL30</span>";
+
+            String patternRanked = "<span class=\"profile-rank-tier\">(.*?)</span>";
+            String patternRankedPoints = "<span class=\"profile-rank-lp\">\\((.*?) LP\\)</span>";
+            String patternRankedTeam = "<span class=\"profile-rank-name\">Ranked (.*?) (\\d.*?)</span>";
+
+            if (!Website.GetMatch(websiteContent, patternLevel, 0, 0).Equals(""))
+            {
+                int rankedIndex = -1;
+                for (int i = 0; ; i++)
+                {
+                    String matchUnranked = Website.GetMatch(websiteContent, patternRanked, i);
+
+                    if (matchUnranked.Equals(""))
+                    {
+                        break;
+                    }
+                    else if(!matchUnranked.Contains("UNRANKED "))
+                    {
+                        rankedIndex = i;
+                        break;
+                    }
+                    
+                }
+                if (rankedIndex != -1)
+                {
+                    if (!Website.GetMatch(websiteContent, patternRanked, rankedIndex).Equals("") && !Website.GetMatch(websiteContent, patternRankedPoints, rankedIndex).Equals(""))
+                    {
+                        division = Website.GetMatch(websiteContent, patternRanked, rankedIndex).ToLowerInvariant() + " (" + Website.GetMatch(websiteContent, patternRankedPoints, rankedIndex) + " LP" +
+                            (Website.GetMatch(websiteContent, patternRankedTeam, rankedIndex).Equals("Team")
+                            ? ", " + Website.GetMatch(websiteContent, patternRankedTeam, rankedIndex, 2) + ")"
+                            : ")");
+                    }
+                }
+                else
+                {
+                    division = "Unranked";
+                }
+            }
+            else
+            {
+                division = "Unranked (<30)";
+            }
+
+            return division;
+        }
+
         private String GetRankedStatistics(Obj_AI_Hero hero, ChampionEloDisplayer elo, bool ranked)
+        {
+            if (isAsia)
+            {
+                return this.GetRankedStatisticsAsia(hero, elo, ranked);
+            }
+            else
+            {
+                return this.GetRankedStatisticsOpGg(hero, elo, ranked);
+            }
+        }
+
+        private String GetRankedStatisticsOpGg(Obj_AI_Hero hero, ChampionEloDisplayer elo, bool ranked)
         {
             if (!elo.RankedStatistics.WebsiteContent.Equals(""))
             {
@@ -738,7 +867,36 @@ namespace SAssemblies.Miscs
                   (!matchLose.Equals("") ? matchLose : "0") + "L";
         }
 
+        private String GetRankedStatisticsAsia(Obj_AI_Hero hero, ChampionEloDisplayer elo, bool ranked)
+        {
+            if (!elo.RankedStatistics.WebsiteContent.Equals(""))
+            {
+                return elo.RankedStatistics.WebsiteContent;
+            }
+            if (!ranked)
+                return "0W/0L";
+
+            String websiteContent = elo.GetLolWebSiteContentOverview(hero);
+            String patternWinLose = "<span class=\"profile-ranked-win-loss-row\">Ranked Win/Loss: (.*?) \\( (.*?) / (.*?) \\)</span>";
+            String matchWin = Website.GetMatch(websiteContent, patternWinLose, 0, 2);
+            String matchLose = Website.GetMatch(websiteContent, patternWinLose, 0, 3);
+            return (!matchWin.Equals("") ? matchWin : "0") + "W/" +
+                  (!matchLose.Equals("") ? matchLose : "0") + "L";
+        }
+
         private String GetRecentStatistics(Obj_AI_Hero hero, ChampionEloDisplayer elo)
+        {
+            if (isAsia)
+            {
+                return this.GetRecentStatisticsAsia(hero, elo);
+            }
+            else
+            {
+                return this.GetRecentStatisticsOpGg(hero, elo);
+            }
+        }
+
+        private String GetRecentStatisticsOpGg(Obj_AI_Hero hero, ChampionEloDisplayer elo)
         {
             if (!elo.RecentStatistics.WebsiteContent.Equals(""))
             {
@@ -755,7 +913,58 @@ namespace SAssemblies.Miscs
                   (!matchLose.Equals("") ? matchLose : "0") + "L";
         }
 
+        private String GetRecentStatisticsAsia(Obj_AI_Hero hero, ChampionEloDisplayer elo)
+        {
+            if (!elo.RecentStatistics.WebsiteContent.Equals(""))
+            {
+                return elo.RecentStatistics.WebsiteContent;
+            }
+            String websiteContent = elo.GetLolWebSiteContentOverview(hero);
+            String patternWin = "<span class=\"win-text\">WIN</span>";
+            String patternLose = "<span class=\"loss-text\">LOSS</span>";
+            int countWin = 0;
+            int countLose = 0;
+
+            for (int i = 0; ; i++)
+            {
+                String matchWin = Website.GetMatch(websiteContent, patternWin, i, 0);
+
+                if (matchWin.Equals(""))
+                {
+                    break;
+                }
+
+                countWin++;
+            }
+
+            for (int i = 0; ; i++)
+            {
+                String matchLose = Website.GetMatch(websiteContent, patternLose, i, 0);
+
+                if (matchLose.Equals(""))
+                {
+                    break;
+                }
+
+                countLose++;
+            }
+
+            return countWin + "W/" + countLose + "L";
+        }
+
         private String GetOverallKDA(Obj_AI_Hero hero, ChampionEloDisplayer elo)
+        {
+            if (isAsia)
+            {
+                return this.GetOverallKDAAsia(hero, elo);
+            }
+            else
+            {
+                return this.GetOverallKDAOpGg(hero, elo);
+            }
+        }
+
+        private String GetOverallKDAOpGg(Obj_AI_Hero hero, ChampionEloDisplayer elo)
         {
             if (!elo.OverallKDA.WebsiteContent.Equals(""))
             {
@@ -773,7 +982,35 @@ namespace SAssemblies.Miscs
                   (!matchAssist.Equals("") ? matchAssist : "0");
         }
 
+        private String GetOverallKDAAsia(Obj_AI_Hero hero, ChampionEloDisplayer elo)
+        {
+            if (!elo.OverallKDA.WebsiteContent.Equals(""))
+            {
+                return elo.OverallKDA.WebsiteContent;
+            }
+            String websiteContent = elo.GetLolWebSiteContentOverview(hero);
+            String patternKill = "<td data-toggle=\"tooltip\" data-container=\"body\" title=\"Kills / Game\">(.*?)</td>";
+            String patternAssist = "<td data-toggle=\"tooltip\" data-container=\"body\" title=\"Assists / Game\">(.*?)</td>";
+            String matchKill = Website.GetMatch(websiteContent, patternKill);
+            String matchAssist = Website.GetMatch(websiteContent, patternAssist);
+            return (!matchKill.Equals("") ? matchKill : "-") + "/" +
+                  "-/" +
+                  (!matchAssist.Equals("") ? matchAssist : "-");
+        }
+
         private String GetMmr(Obj_AI_Hero hero, ChampionEloDisplayer elo, bool ranked)
+        {
+            if (isAsia)
+            {
+                return this.GetMmrAsia(hero, elo, ranked);
+            }
+            else
+            {
+                return this.GetMmrOpGg(hero, elo, ranked);
+            }
+        }
+
+        private String GetMmrOpGg(Obj_AI_Hero hero, ChampionEloDisplayer elo, bool ranked)
         {
             if (!elo.MMR.WebsiteContent.Equals(""))
             {
@@ -789,7 +1026,7 @@ namespace SAssemblies.Miscs
             }
             catch (Exception ex)
             {
-                if (!ex.Message.Equals("The remote server returned an error: (418)."))
+                if (!ex.Message.Equals("The remote server returned an error: (418) nginx/1.9.9."))
                 {
                     throw;
                 }
@@ -804,6 +1041,11 @@ namespace SAssemblies.Miscs
             String matchAverageMmr = Website.GetMatch(websiteContent, patternAverageMmr, 0, 2);
             return (!matchMmr.Equals("") ? matchMmr : "0") + "/" +
                    (!matchAverageMmr.Equals("") ? matchAverageMmr : "0");
+        }
+
+        private String GetMmrAsia(Obj_AI_Hero hero, ChampionEloDisplayer elo, bool ranked)
+        {
+            return "-/-";
         }
 
         private String GetMasteriesSmart(Obj_AI_Hero hero, ChampionEloDisplayer elo)
@@ -856,6 +1098,18 @@ namespace SAssemblies.Miscs
 
         private String GetRunes(Obj_AI_Hero hero, ChampionEloDisplayer elo)
         {
+            if (isAsia)
+            {
+                return this.GetRunesAsia(hero, elo);
+            }
+            else
+            {
+                return this.GetRunesOpGg(hero, elo);
+            }
+        }
+
+        private String GetRunesOpGg(Obj_AI_Hero hero, ChampionEloDisplayer elo)
+        {
             if (!elo.Runes.WebsiteContent.Equals(""))
             {
                 return elo.Runes.WebsiteContent;
@@ -880,7 +1134,24 @@ namespace SAssemblies.Miscs
             return runes;
         }
 
+        private String GetRunesAsia(Obj_AI_Hero hero, ChampionEloDisplayer elo)
+        {
+            return "No data available";
+        }
+
         private String GetChampionKDA(Obj_AI_Hero hero, ChampionEloDisplayer elo, String season)
+        {
+            if (isAsia)
+            {
+                return this.GetChampionKDAAsia(hero, elo, season);
+            }
+            else
+            {
+                return this.GetChampionKDAOpGg(hero, elo, season);
+            }
+        }
+
+        private String GetChampionKDAOpGg(Obj_AI_Hero hero, ChampionEloDisplayer elo, String season)
         {
             if (!elo.ChampionKDA.WebsiteContent.Equals("") && !elo.ChampionKDA.WebsiteContent.Equals("0/0/0"))
             {
@@ -917,6 +1188,24 @@ namespace SAssemblies.Miscs
             return matchKill + "/" + matchDeath + "/" + matchAssist;
         }
 
+        private String GetChampionKDAAsia(Obj_AI_Hero hero, ChampionEloDisplayer elo, String season)
+        {
+            if (!elo.ChampionKDA.WebsiteContent.Equals("") && !elo.ChampionKDA.WebsiteContent.Equals("0/0/0"))
+            {
+                return elo.ChampionKDA.WebsiteContent;
+            }
+            String championContent = elo.GetLolWebSiteContentOverview(hero);
+            championContent = championContent.Replace("&#039;", "");
+            String patternKill = "<td data-toggle=\"tooltip\" data-container=\"body\" title=\"" + hero.ChampionName + ": Kills / Game\">(.*?)</td>";
+            String patternAssist = "<td data-toggle=\"tooltip\" data-container=\"body\" title=\"" + hero.ChampionName + ": Assists / Game\">(.*?)</td>";
+            String matchKill = Website.GetMatch(championContent, patternKill);
+            String matchAssist = Website.GetMatch(championContent, patternAssist);
+            Console.WriteLine(patternAssist);
+            if (matchKill.Equals("") && matchAssist.Equals(""))
+                return "0/-/0";
+            return matchKill + "/" + "-/" + matchAssist;
+        }
+
         private String GetChampionKDALastSeason(Obj_AI_Hero hero, ChampionEloDisplayer elo, bool ranked)
         {
             if (!ranked)
@@ -931,6 +1220,18 @@ namespace SAssemblies.Miscs
         }
 
         private String GetChampionWinRatio(Obj_AI_Hero hero, ChampionEloDisplayer elo, String season)
+        {
+            if (isAsia)
+            {
+                return this.GetChampionWinRatioAsia(hero, elo, season);
+            }
+            else
+            {
+                return this.GetChampionWinRatioOpGg(hero, elo, season);
+            }
+        }
+
+        private String GetChampionWinRatioOpGg(Obj_AI_Hero hero, ChampionEloDisplayer elo, String season)
         {
             if (!elo.ChampionGames.WebsiteContent.Equals("") && !elo.ChampionGames.WebsiteContent.Equals("-1%"))
             {
@@ -961,6 +1262,11 @@ namespace SAssemblies.Miscs
             return matchWinRatio;
         }
 
+        private String GetChampionWinRatioAsia(Obj_AI_Hero hero, ChampionEloDisplayer elo, String season)
+        {
+            return "-1%";
+        }
+
         private String GetChampionWinRatioLastSeason(Obj_AI_Hero hero, ChampionEloDisplayer elo, bool ranked)
         {
             if (!ranked)
@@ -987,15 +1293,17 @@ namespace SAssemblies.Miscs
 
         private bool UpdateStatus(Obj_AI_Hero hero, ChampionEloDisplayer elo)
         {
+            if (isAsia)
+            {
+                return true;
+            }
             String websiteContent = elo.GetLolWebSiteContentOverview(hero);
-            if (
-                GetLolWebSiteContent("summoner/ajax/update.json/summonerId=" + GetSummonerId(websiteContent))
+            if (GetLolWebSiteContent("summoner/ajax/update.json/summonerId=" + GetSummonerId(websiteContent))
                     .Contains("\"error\":true"))
             {
                 return true;
             }
             return false;
-            //WebRequest.Create(updateUrl).GetResponse();
         }
 
         private String GetSummonerId(String websiteContent)
