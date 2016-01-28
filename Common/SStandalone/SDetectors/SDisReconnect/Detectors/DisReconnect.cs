@@ -71,6 +71,10 @@ namespace SAssemblies.Detectors
                 {
                     packet = 33;
                 }
+                if (Game.Version.Contains("6.2"))
+                {
+                    packet = 135;
+                }
                 if (packetId != packet || args.PacketData.Length != 12)
                     return;
                 if (DisReconnectDetector.GetMenuItem("SAssembliesDetectorsDisReconnectChat").GetValue<bool>() &&
@@ -107,6 +111,10 @@ namespace SAssemblies.Detectors
                 if (Game.Version.Contains("6.1"))
                 {
                     packet = 253;
+                }
+                if (Game.Version.Contains("6.2"))
+                {
+                    packet = 65;
                 }
                 if (packetId != packet) //Length 7
                     return;
