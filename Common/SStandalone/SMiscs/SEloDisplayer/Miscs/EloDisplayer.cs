@@ -166,6 +166,11 @@ namespace SAssemblies.Miscs
                 Obj_AI_Hero hero = ally.Key;
                 ChampionEloDisplayer champ = ally.Value;
 
+                if (champ.SummonerIcon.Sprite.Bitmap == null)
+                {
+                    continue;
+                }
+
                 MainBitmap.AddBitmap(champ.SummonerIcon.Sprite.Bitmap, new System.Drawing.Point((int)champ.SummonerIcon.Position.X, (int)champ.SummonerIcon.Position.Y));
                 MainBitmap.AddText(hero.Name, new System.Drawing.Point((int)champ.SummonerName.Position.X, (int)champ.SummonerName.Position.Y), Brushes.Orange);
                 MainBitmap.AddText(champ.Divison.WebsiteContent, new System.Drawing.Point((int)champ.Divison.Position.X, (int)champ.Divison.Position.Y), Brushes.Orange);
@@ -185,6 +190,11 @@ namespace SAssemblies.Miscs
             {
                 Obj_AI_Hero hero = enemy.Key;
                 ChampionEloDisplayer champ = enemy.Value;
+
+                if (champ.SummonerIcon.Sprite.Bitmap == null)
+                {
+                    continue;
+                }
 
                 MainBitmap.AddBitmap(champ.SummonerIcon.Sprite.Bitmap, new System.Drawing.Point((int)champ.SummonerIcon.Position.X, (int)champ.SummonerIcon.Position.Y));
                 MainBitmap.AddText(hero.Name, new System.Drawing.Point((int)champ.SummonerName.Position.X, (int)champ.SummonerName.Position.Y), Brushes.Orange);
@@ -234,9 +244,6 @@ namespace SAssemblies.Miscs
             {
                 if (hero.Value.SummonerIcon != null && hero.Value.SummonerIcon.Sprite != null && hero.Value.SummonerIcon.Sprite.Bitmap != null)
                 {
-                    Console.WriteLine(hero.Value.SummonerIcon);
-                    Console.WriteLine(hero.Value.SummonerIcon.Sprite);
-                    Console.WriteLine(hero.Value.SummonerIcon.Sprite.Bitmap);
                     hero.Value.SummonerIcon.Position = new Vector2(70, yOffset + (index * hero.Value.SummonerIcon.Sprite.Bitmap.Height));
                     hero.Value.SummonerName.Position = new Vector2(hero.Value.SummonerIcon.Position.X + hero.Value.SummonerIcon.Sprite.Bitmap.Width + 10, hero.Value.SummonerIcon.Position.Y);
                     hero.Value.ChampionName.Position = new Vector2(hero.Value.SummonerName.Position.X, hero.Value.SummonerName.Position.Y + textFontSize);
@@ -358,38 +365,40 @@ namespace SAssemblies.Miscs
             this.MainFrame.Position = new Vector2(Drawing.Width / 2 - this.MainBitmap.Bitmap.Width / 2, Drawing.Height / 2 - this.MainBitmap.Bitmap.Height / 2);
         }
 
-        void Game_OnGameUpdateAsyncTexts(EventArgs args)
+        private void LoadAsync()
         {
-            if (!IsActive() || lastGameUpdateTextsTime + new Random().Next(500, 1000) > Environment.TickCount)
-                return;
-
-            lastGameUpdateTextsTime = Environment.TickCount;
-
+            this.LoadTextsAsync();
             bool finished = true;
-            foreach (var ally in _allies)
+            do
             {
-                if (ally.Value.IsFinished())
+                finished = true;
+                foreach (var ally in _allies)
                 {
-                    continue;
+                    if (ally.Value.IsFinished())
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        finished = false;
+                        break;
+                    }
                 }
-                else
+                foreach (var enemy in _enemies)
                 {
-                    finished = false;
-                    break;
+                    if (enemy.Value.IsFinished())
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        finished = false;
+                        break;
+                    }
                 }
             }
-            foreach (var enemy in _enemies)
-            {
-                if (enemy.Value.IsFinished())
-                {
-                    continue;
-                }
-                else
-                {
-                    finished = false;
-                    break;
-                }
-            }
+            while (!finished);
+
             if (finished && !Loading && !FinishedLoadingComplete)
             {
                 Loading = true;
@@ -397,162 +406,97 @@ namespace SAssemblies.Miscs
             }
         }
 
-        private void LoadAsync()
+        private void LoadTextsAsync()
         {
-            this.LoadSpritesAsync();
-            this.LoadTextsAsync();
-            if (!Loading && !FinishedLoadingComplete)
+            foreach (var ally in _allies)
             {
-                Loading = true;
-                new Thread(this.FinishedLoading).Start();
+                new Thread(delegate () { LoadSummonerAsync(ally); }).Start();
+            }
+            foreach (var enemy in _enemies)
+            {
+                new Thread(delegate () { LoadSummonerAsync(enemy); }).Start();
             }
         }
 
-        private void LoadSpritesAsync()
-        {
-            bool finished = true;
-            do
-            {
-                foreach (var ally in _allies)
-                {
-                    try
-                    {
-                        ally.Value.SummonerIcon.WebsiteContent = GetSummonerIcon(ally.Key, ally.Value);
-                        if (!ally.Value.SummonerIcon.WebsiteContent.Equals(""))
-                        {
-                            SpriteHelper.DownloadImageRiot(
-                                ally.Value.SummonerIcon.WebsiteContent,
-                                SpriteHelper.ChampionType.None,
-                                SpriteHelper.DownloadType.ProfileIcon,
-                                @"EloDisplayer\");
-                            ally.Value.SummonerIcon.Sprite = new SpriteHelper.SpriteInfo();
-                            ally.Value.SummonerIcon.Sprite.Bitmap = SpriteHelper.SpecialBitmap.ResizeBitmap(SpriteHelper.SpecialBitmap.LoadBitmap(ally.Value.SummonerIcon.WebsiteContent, @"EloDisplayer\"), 0.35f);
-                        }
-                        else
-                        {
-                            throw new Exception();
-                        }
-                        ally.Value.SummonerIcon.FinishedLoading = true;
-                    }
-                    catch (Exception)
-                    {
-                        finished = false;
-                    }
-                }
-                foreach (var enemy in _enemies)
-                {
-                    try
-                    {
-                        enemy.Value.SummonerIcon.WebsiteContent = GetSummonerIcon(enemy.Key, enemy.Value);
-                        if (!enemy.Value.SummonerIcon.WebsiteContent.Equals(""))
-                        {
-                            SpriteHelper.DownloadImageRiot(
-                                enemy.Value.SummonerIcon.WebsiteContent,
-                                SpriteHelper.ChampionType.None,
-                                SpriteHelper.DownloadType.ProfileIcon,
-                                @"EloDisplayer\");
-                            enemy.Value.SummonerIcon.Sprite = new SpriteHelper.SpriteInfo();
-                            enemy.Value.SummonerIcon.Sprite.Bitmap = SpriteHelper.SpecialBitmap.ResizeBitmap(SpriteHelper.SpecialBitmap.LoadBitmap(enemy.Value.SummonerIcon.WebsiteContent, @"EloDisplayer\"), 0.35f);
-                        }
-                        else
-                        {
-                            throw new Exception();
-                        }
-                        enemy.Value.SummonerIcon.FinishedLoading = true;
-                    }
-                    catch (Exception)
-                    {
-                        finished = false;
-                    }
-                }
-            } while (!finished);
-        }
-
-        private void LoadTextsAsync()
+        private void LoadSummonerAsync(KeyValuePair<Obj_AI_Hero, ChampionEloDisplayer> summoner)
         {
             bool finished = true;
             do
             {
                 finished = true;
-                foreach (var ally in _allies)
+                try
                 {
-                    try
+                    if (!this.ValidSummoner(summoner.Key, summoner.Value))
                     {
-                        if (!UpdateStatus(ally.Key, ally.Value))
-                        {
-                            finished = false;
-                            continue;
-                        }
-                        ally.Value.Divison.WebsiteContent = GetDivision(ally.Key, ally.Value, ref ally.Value.Ranked);
-                        ally.Value.Divison.FinishedLoading = true;
-                        ally.Value.RankedStatistics.WebsiteContent = GetRankedStatistics(ally.Key, ally.Value, true);
-                        ally.Value.RankedStatistics.FinishedLoading = true;
-                        ally.Value.MMR.WebsiteContent = GetMmr(ally.Key, ally.Value, true);
-                        ally.Value.MMR.FinishedLoading = true;
-                        ally.Value.RecentStatistics.WebsiteContent = GetRecentStatistics(ally.Key, ally.Value);
-                        ally.Value.RecentStatistics.FinishedLoading = true;
-                        ally.Value.ChampionGames.WebsiteContent = this.GetChampionWinRatioLastSeason(ally.Key, ally.Value, true);
-                        if (ally.Value.ChampionGames.WebsiteContent.Equals("-1%"))
-                        {
-                            ally.Value.ChampionGames.WebsiteContent = this.GetChampionWinRatioNormal(ally.Key, ally.Value);
-                        }
-                        ally.Value.ChampionGames.FinishedLoading = true;
-                        ally.Value.OverallKDA.WebsiteContent = GetOverallKDA(ally.Key, ally.Value);
-                        ally.Value.OverallKDA.FinishedLoading = true;
-                        ally.Value.ChampionKDA.WebsiteContent = GetChampionKDALastSeason(ally.Key, ally.Value, true);
-                        if (ally.Value.ChampionKDA.WebsiteContent.Equals("0/0/0"))
-                        {
-                            ally.Value.ChampionKDA.WebsiteContent = GetChampionKDANormal(ally.Key, ally.Value);
-                        }
-                        ally.Value.ChampionKDA.FinishedLoading = true;
-                        ally.Value.Runes.WebsiteContent = GetRunes(ally.Key, ally.Value);
-                        ally.Value.Runes.FinishedLoading = true;
+                        summoner.Value.SummonerIcon.Sprite = new SpriteHelper.SpriteInfo();
+                        summoner.Value.SummonerIcon.FinishedLoading = true;
+                        summoner.Value.Divison.FinishedLoading = true;
+                        summoner.Value.RankedStatistics.FinishedLoading = true;
+                        summoner.Value.MMR.FinishedLoading = true;
+                        summoner.Value.RecentStatistics.FinishedLoading = true;
+                        summoner.Value.ChampionGames.FinishedLoading = true;
+                        summoner.Value.OverallKDA.FinishedLoading = true;
+                        summoner.Value.ChampionKDA.FinishedLoading = true;
+                        summoner.Value.Runes.FinishedLoading = true;
+                        return;
                     }
-                    catch (Exception e)
+                    if (!this.UpdateStatus(summoner.Key, summoner.Value))
                     {
                         finished = false;
+                        continue;
                     }
+                    this.LoadSummonerSpriteAsync(summoner);
+                    summoner.Value.Divison.WebsiteContent = this.GetDivision(summoner.Key, summoner.Value, ref summoner.Value.Ranked);
+                    summoner.Value.Divison.FinishedLoading = true;
+                    summoner.Value.RankedStatistics.WebsiteContent = this.GetRankedStatistics(summoner.Key, summoner.Value, true);
+                    summoner.Value.RankedStatistics.FinishedLoading = true;
+                    summoner.Value.MMR.WebsiteContent = this.GetMmr(summoner.Key, summoner.Value, true);
+                    summoner.Value.MMR.FinishedLoading = true;
+                    summoner.Value.RecentStatistics.WebsiteContent = this.GetRecentStatistics(summoner.Key, summoner.Value);
+                    summoner.Value.RecentStatistics.FinishedLoading = true;
+                    summoner.Value.ChampionGames.WebsiteContent = this.GetChampionWinRatioLastSeason(summoner.Key, summoner.Value, true);
+                    if (summoner.Value.ChampionGames.WebsiteContent.Equals("-1%"))
+                    {
+                        summoner.Value.ChampionGames.WebsiteContent = this.GetChampionWinRatioNormal(summoner.Key, summoner.Value);
+                    }
+                    summoner.Value.ChampionGames.FinishedLoading = true;
+                    summoner.Value.OverallKDA.WebsiteContent = this.GetOverallKDA(summoner.Key, summoner.Value);
+                    summoner.Value.OverallKDA.FinishedLoading = true;
+                    summoner.Value.ChampionKDA.WebsiteContent = this.GetChampionKDALastSeason(summoner.Key, summoner.Value, true);
+                    if (summoner.Value.ChampionKDA.WebsiteContent.Equals("0/0/0"))
+                    {
+                        summoner.Value.ChampionKDA.WebsiteContent = this.GetChampionKDANormal(summoner.Key, summoner.Value);
+                    }
+                    summoner.Value.ChampionKDA.FinishedLoading = true;
+                    summoner.Value.Runes.WebsiteContent = this.GetRunes(summoner.Key, summoner.Value);
+                    summoner.Value.Runes.FinishedLoading = true;
                 }
-                foreach (var enemy in _enemies)
+                catch (Exception e)
                 {
-                    try
-                    {
-                        if (!UpdateStatus(enemy.Key, enemy.Value))
-                        {
-                            finished = false;
-                            continue;
-                        }
-                        enemy.Value.Divison.WebsiteContent = GetDivision(enemy.Key, enemy.Value, ref enemy.Value.Ranked);
-                        enemy.Value.Divison.FinishedLoading = true;
-                        enemy.Value.RankedStatistics.WebsiteContent = GetRankedStatistics(enemy.Key, enemy.Value, true);
-                        enemy.Value.RankedStatistics.FinishedLoading = true;
-                        enemy.Value.MMR.WebsiteContent = GetMmr(enemy.Key, enemy.Value, true);
-                        enemy.Value.MMR.FinishedLoading = true;
-                        enemy.Value.RecentStatistics.WebsiteContent = GetRecentStatistics(enemy.Key, enemy.Value);
-                        enemy.Value.RecentStatistics.FinishedLoading = true;
-                        enemy.Value.ChampionGames.WebsiteContent = this.GetChampionWinRatioLastSeason(enemy.Key, enemy.Value, true);
-                        if (enemy.Value.ChampionGames.WebsiteContent.Equals("-1%"))
-                        {
-                            enemy.Value.ChampionGames.WebsiteContent = this.GetChampionWinRatioNormal(enemy.Key, enemy.Value);
-                        }
-                        enemy.Value.ChampionGames.FinishedLoading = true;
-                        enemy.Value.OverallKDA.WebsiteContent = GetOverallKDA(enemy.Key, enemy.Value);
-                        enemy.Value.OverallKDA.FinishedLoading = true;
-                        enemy.Value.ChampionKDA.WebsiteContent = GetChampionKDALastSeason(enemy.Key, enemy.Value, true);
-                        if (enemy.Value.ChampionKDA.WebsiteContent.Equals("0/0/0"))
-                        {
-                            enemy.Value.ChampionKDA.WebsiteContent = GetChampionKDANormal(enemy.Key, enemy.Value);
-                        }
-                        enemy.Value.ChampionKDA.FinishedLoading = true;
-                        enemy.Value.Runes.WebsiteContent = GetRunes(enemy.Key, enemy.Value);
-                        enemy.Value.Runes.FinishedLoading = true;
-                    }
-                    catch (Exception e)
-                    {
-                        finished = false;
-                    }
+                    finished = false;
                 }
-            } while (!finished);
+            }
+            while (!finished);
+        }
+
+        private void LoadSummonerSpriteAsync(KeyValuePair<Obj_AI_Hero, ChampionEloDisplayer> summoner)
+        {
+            summoner.Value.SummonerIcon.WebsiteContent = this.GetSummonerIcon(summoner.Key, summoner.Value);
+            if (!summoner.Value.SummonerIcon.WebsiteContent.Equals("") && !summoner.Value.SummonerIcon.WebsiteContent.Equals(".png"))
+            {
+                SpriteHelper.DownloadImageRiot(
+                    summoner.Value.SummonerIcon.WebsiteContent,
+                    SpriteHelper.ChampionType.None,
+                    SpriteHelper.DownloadType.ProfileIcon,
+                    @"EloDisplayer\");
+                summoner.Value.SummonerIcon.Sprite = new SpriteHelper.SpriteInfo();
+                summoner.Value.SummonerIcon.Sprite.Bitmap = SpriteHelper.SpecialBitmap.ResizeBitmap(SpriteHelper.SpecialBitmap.LoadBitmap(summoner.Value.SummonerIcon.WebsiteContent, @"EloDisplayer\"), 0.35f);
+                summoner.Value.SummonerIcon.FinishedLoading = true;
+            }
+            else
+            {
+                throw new Exception();
+            }
         }
 
         public static String GetLolWebSiteContent(String webSite)
@@ -638,8 +582,6 @@ namespace SAssemblies.Miscs
         //https://www.joduska.me/forum/topic/31648-ping-tester-for-every-region/
         public static String GetRegionPrefix()
         {
-            //isAsia = true;
-            //return "sg";
             switch (Game.Region.ToLower())
             {
                 case "euw1":
@@ -1302,6 +1244,22 @@ namespace SAssemblies.Miscs
             if (GetLolWebSiteContent("summoner/ajax/update.json/summonerId=" + GetSummonerId(websiteContent))
                     .Contains("\"error\":true"))
             {
+                elo.GetLolWebSiteContentOverview(hero, true);
+                return true;
+            }
+            return false;
+        }
+
+        private bool ValidSummoner(Obj_AI_Hero hero, ChampionEloDisplayer elo)
+        {
+            if (isAsia)
+            {
+                return true;
+            }
+            String websiteContent = elo.GetLolWebSiteContentOverview(hero);
+            String summonerId = GetSummonerId(websiteContent);
+            if (!summonerId.Equals(""))
+            {
                 return true;
             }
             return false;
@@ -1411,9 +1369,9 @@ namespace SAssemblies.Miscs
             private String websiteContentChampion = "";
             private String _currentSeason = "";
 
-            public String GetLolWebSiteContentOverview(Obj_AI_Hero hero)
+            public String GetLolWebSiteContentOverview(Obj_AI_Hero hero, bool force = false)
             {
-                if (websiteContentOverview == "")
+                if (websiteContentOverview == "" || force)
                 {
                     websiteContentOverview = EloDisplayer.GetLolWebSiteContentOverview(hero);
                 }
