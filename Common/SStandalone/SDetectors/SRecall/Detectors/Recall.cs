@@ -35,13 +35,7 @@ namespace SAssemblies.Detectors
                 }
             }
             Obj_AI_Base.OnTeleport += Obj_AI_Base_OnTeleport;
-            GameUpdate a = null;
-            a = delegate(EventArgs args)
-            {
-                Init();
-                Game.OnUpdate -= a;
-            };
-            Game.OnUpdate += a;
+            Common.ExecuteInOnGameUpdate(() => Init());
         }
 
         ~Recall()
