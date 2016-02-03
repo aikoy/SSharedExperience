@@ -450,7 +450,6 @@ namespace SAssemblies.Miscs
             }
 
             Obj_AI_Hero player = ObjectManager.Player;
-            SpellSlot[] spellSlotst = GetSortedPriotitySlots();
             if (player.SpellTrainingPoints > 0)
             {
                 //TODO: Add level logic// try levelup spell, if fails level another up etc.

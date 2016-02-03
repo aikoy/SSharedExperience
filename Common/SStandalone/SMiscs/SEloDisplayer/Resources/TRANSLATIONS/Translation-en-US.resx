@@ -897,4 +897,7 @@
   <data name="CHAMPIONS_TAHMKENCH_W_SHIELD_PERCENT" xml:space="preserve">
     <value>Auto shield ally hp percent</value>
   </data>
+  <data name="MISCS_ANTIJUMP_MAIN" xml:space="preserve">
+    <value>Anti Jump</value>
+  </data>
 </root>
