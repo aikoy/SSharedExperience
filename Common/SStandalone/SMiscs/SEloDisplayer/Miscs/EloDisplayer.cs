@@ -634,7 +634,7 @@ namespace SAssemblies.Miscs
                     isAsia = true;
                     return "th";
 
-                case "id":
+                case "id1":
                     isAsia = true;
                     return "id";
 
