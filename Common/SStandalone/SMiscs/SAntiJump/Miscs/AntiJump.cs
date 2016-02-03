@@ -41,7 +41,7 @@ namespace SAssemblies.Miscs
                     Champion = new Champ(200, SpellSlot.R, true);
                     break;
 
-                case "Bitzcrank":
+                case "Blitzcrank":
                     Champion = new Champ(950, SpellSlot.Q, true, 1800, 0.25f, 70);
                     break;
 
@@ -93,16 +93,16 @@ namespace SAssemblies.Miscs
                     Champion = new Champ(675, SpellSlot.R, false);
                     break;
 
-                case "Jinx":
-                    Champion = new Champ(900, SpellSlot.E, true, 1750, 1.2f, 300);
-                    break;
-
                 case "Jax":
                     Champion = new Champ(125, SpellSlot.E, false);
                     break;
 
                 case "Jayce":
                     Champion = new Champ(240, SpellSlot.E, false);
+                    break;
+
+                case "Jinx":
+                    Champion = new Champ(900, SpellSlot.E, true, 1750, 1.2f, 300);
                     break;
 
                 case "Leona":
