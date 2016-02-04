@@ -900,4 +900,7 @@
   <data name="MISCS_ANTIJUMP_MAIN" xml:space="preserve">
     <value>Anti Jump</value>
   </data>
+  <data name="GLOBAL_DELAY" xml:space="preserve">
+    <value>Delay</value>
+  </data>
 </root>

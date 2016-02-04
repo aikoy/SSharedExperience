@@ -32,6 +32,7 @@ namespace SAssemblies.Miscs
         private static int _useMode;
         private static List<SequenceLevler> sLevler = new List<SequenceLevler>();
         private int lastGameUpdateTime = 0;
+        private int lastLevelUpTime = 0;
         private SequenceLevlerGUI Gui = new SequenceLevlerGUI();
 
         private SpriteHelper.SpecialBitmap MainBitmap = null;
@@ -54,6 +55,7 @@ namespace SAssemblies.Miscs
             Game.OnUpdate += Game_OnGameUpdate;
             Game.OnWndProc += Game_OnWndProc;
             AppDomain.CurrentDomain.DomainUnload += CurrentDomain_DomainUnload;
+            Obj_AI_Base.OnLevelUp += Obj_AI_Hero_OnLevelUp;
         }
 
         ~AutoLevler()
@@ -66,6 +68,7 @@ namespace SAssemblies.Miscs
             Game.OnUpdate -= Game_OnGameUpdate;
             Game.OnWndProc -= Game_OnWndProc;
             AppDomain.CurrentDomain.DomainUnload -= CurrentDomain_DomainUnload;
+            Obj_AI_Base.OnLevelUp -= Obj_AI_Hero_OnLevelUp;
             sLevler = null;
         }
 
@@ -125,6 +128,7 @@ namespace SAssemblies.Miscs
                     Language.GetString("MISCS_AUTOLEVLER_MODE_SEQUENCE"),
                     Language.GetString("MISCS_AUTOLEVLER_MODE_R")
                 })));
+                AutoLevlerMisc.Menu.AddItem(new MenuItem("SAssembliesMiscsAutoLevlerDelay", Language.GetString("GLOBAL_DELAY")).SetValue(new Slider(2, 10, 0)));
                 AutoLevlerMisc.CreateActiveMenuItem("SAssembliesMiscsAutoLevlerActive", () => new AutoLevler());
             }
             return AutoLevlerMisc;
@@ -186,6 +190,16 @@ namespace SAssemblies.Miscs
             Game.OnUpdate -= Game_OnGameUpdate;
             Game.OnWndProc -= Game_OnWndProc;
             sLevler = null;
+        }
+
+        private void Obj_AI_Hero_OnLevelUp(Obj_AI_Base sender, EventArgs args)
+        {
+            Console.WriteLine("Levelup: " + Game.Time);
+            if (sender.IsMe)
+            {
+                Console.WriteLine("LevelupMe: "+ Game.Time);
+                lastLevelUpTime = (int)Game.Time;
+            }
         }
 
         private void Game_OnWndProc(WndEventArgs args)
@@ -448,9 +462,9 @@ namespace SAssemblies.Miscs
             {
                 _useMode = 2;
             }
-
+            var delay = AutoLevlerMisc.GetMenuItem("SAssembliesMiscsAutoLevlerDelay").GetValue<Slider>().Value;
             Obj_AI_Hero player = ObjectManager.Player;
-            if (player.SpellTrainingPoints > 0)
+            if (player.SpellTrainingPoints > 0 && lastLevelUpTime + delay < Game.Time)
             {
                 //TODO: Add level logic// try levelup spell, if fails level another up etc.
                 if (_useMode == 0 && AutoLevlerMisc.GetMenuSettings("SAssembliesMiscsAutoLevlerPriority")
@@ -496,6 +510,7 @@ namespace SAssemblies.Miscs
                         }
                     }
                 }
+                lastLevelUpTime = (int)Game.Time;
             }
         }
 
