@@ -15,8 +15,6 @@ using Newtonsoft.Json;
 using SharpDX;
 using SharpDX.Direct3D9;
 
-//HandleInput Crashing and SequenceLevler
-
 namespace SAssemblies.Miscs
 {
     using System.Security.Permissions;
@@ -49,7 +47,7 @@ namespace SAssemblies.Miscs
             AutoLevlerMisc.GetMenuSettings("SAssembliesMiscsAutoLevlerSequence").GetMenuItem("SAssembliesMiscsAutoLevlerSequenceNewBuild").ValueChanged += NewBuild_OnValueChanged;
             AutoLevlerMisc.GetMenuSettings("SAssembliesMiscsAutoLevlerSequence").GetMenuItem("SAssembliesMiscsAutoLevlerSequenceDeleteBuild").ValueChanged += DeleteBuild_OnValueChanged;
 
-            new Thread(LolBuilder.GetLolBuilderData).Start();
+            new Thread(this.GetBuilds).Start();
             Common.ExecuteInOnGameUpdate(() => Init());
 
             Game.OnUpdate += Game_OnGameUpdate;
@@ -835,6 +833,13 @@ namespace SAssemblies.Miscs
             return ObjectManager.Player.ChampionName + 0;
         }
 
+        private void GetBuilds()
+        {
+            new Thread(LolBuilder.GetLolBuilderData).Start();
+            new Thread(ChampionGg.GetChampionGgData).Start();
+            FinishedLoadingComplete = true;
+        }
+
         private class LolBuilder
         {
 
@@ -848,6 +853,7 @@ namespace SAssemblies.Miscs
                 catch (Exception e)
                 {
                     Console.WriteLine(e);
+                    return;
                 }
 
                 String patternSkillOrder = "window.skillOrder\\[(.*?)\\] = \\[(.*?)\\];";
@@ -880,7 +886,79 @@ namespace SAssemblies.Miscs
                     SequenceLevlerGUI.CurrentLevler = seqLevler;
                     Common.ExecuteInOnGameUpdate(() => SaveSequence(seqLevler.New));
                 }
-                FinishedLoadingComplete = true;
+            }
+        }
+
+        private class ChampionGg
+        {
+
+            public static void GetChampionGgData()
+            {
+                String championGgData = null;
+                try
+                {
+                    championGgData = Website.GetWebSiteContent("http://champion.gg/champion/" + ObjectManager.Player.ChampionName);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    return;
+                }
+
+                List<String> matchesLane = new List<string>();
+                String patternUrl = "<a href=\"/champion/Ryze/(.*?)\">";
+
+                for (int i = 0; ; i++)
+                {
+                    String matchUrl = Website.GetMatch(championGgData, patternUrl, i);
+                    if (matchUrl.Equals(""))
+                    {
+                        break;
+                    }
+                    matchesLane.Add(matchUrl);
+                }
+
+                foreach (var lane in matchesLane)
+                {
+                    try
+                    {
+                        championGgData = Website.GetWebSiteContent("http://champion.gg/champion/" + ObjectManager.Player.ChampionName + "/" + lane);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                        continue;
+                    }
+
+                    String patternSkillTree =
+                        "<h2 class=\"champion-stats\" style=\"margin-top:55px\">Highest Win % Skill Order</h2><div class=\"skill-order clearfix\">(.*?)</div><div class=\"build-text\">";
+                    String matchSkillTree = Website.GetMatch(championGgData, patternSkillTree);
+
+                    List<String> matchesSkill = new List<string>();
+                    String patternSkillRow = "<div class=\"(|selected)\">";
+
+                    for (int i = 0; i < 72; i++)
+                    {
+                        String matchSkill = Website.GetMatch(matchSkillTree, patternSkillRow, i);
+                        matchesSkill.Add(matchSkill);
+                    }
+
+                    SpellSlot[] spellSlots = new SpellSlot[18];
+
+                    for (int i = 0; i < matchesSkill.Count; i++)
+                    {
+                        if (matchesSkill[i].Equals("selected"))
+                        {
+                            int row = i % 18;
+                            int spell = (int)Math.Floor(i / 18d);
+                            spellSlots[row] = (SpellSlot)spell;
+                        }
+                    }
+                    SequenceLevler seqLevler = new SequenceLevler(ObjectManager.Player.ChampionName + " ChampionGG " + lane, spellSlots, true);
+                    seqLevler.New = true;
+                    SequenceLevlerGUI.CurrentLevler = seqLevler;
+                    Common.ExecuteInOnGameUpdate(() => SaveSequence(seqLevler.New));
+                }
             }
         }
 
