@@ -903,4 +903,16 @@
   <data name="GLOBAL_DELAY" xml:space="preserve">
     <value>Delay</value>
   </data>
+  <data name="DETECTORS_SHAREDEXPERIENCE_MAIN" xml:space="preserve">
+    <value>Shared Experience</value>
+  </data>
+  <data name="DETECTORS_SHAREDEXPERIENCE_RESETTIME" xml:space="preserve">
+    <value>Reset Time</value>
+  </data>
+  <data name="DETECTORS_SHAREDEXPERIENCE_TEXT" xml:space="preserve">
+    <value>Enemies missing for </value>
+  </data>
+  <data name="DETECTORS_SHAREDEXPERIENCE_TRACKRANGE" xml:space="preserve">
+    <value>Track Range</value>
+  </data>
 </root>
