@@ -7,8 +7,6 @@ using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
 
-//TODO: Add invisible enemy count
-
 namespace SAssemblies.Detectors
 {
     using System.Drawing;
@@ -89,7 +87,7 @@ namespace SAssemblies.Detectors
                     enemy.Value.LastExpTime = Game.Time;
                     double oldExp = Math.Round(enemy.Value.Experience, 2);
                     double newExp = Math.Round(enemy.Key.Experience, 2);
-                    if (ObjectManager.Get<Obj_AI_Minion>().Any(x => x.Distance(enemy.Key) < 1600 && x.IsDead))
+                    if (ObjectManager.Get<Obj_AI_Minion>().Any(x => x.Distance(enemy.Key) < 1600 && x.IsDead && x.IsAlly))
                     {
                         if (oldExp + experienceMelee != newExp &&
                             oldExp + experienceRanged != newExp &&
@@ -153,6 +151,11 @@ namespace SAssemblies.Detectors
                                     enemy.Value.Circle.Visible = true;
                                     enemy.Value.Text.Visible = true;
                                 }
+                            }
+                            else
+                            {
+                                enemy.Value.Text.Visible = false;
+                                enemy.Value.Circle.Visible = false;
                             }
                         }
                         else
