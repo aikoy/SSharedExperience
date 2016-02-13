@@ -915,4 +915,13 @@
   <data name="DETECTORS_SHAREDEXPERIENCE_TRACKRANGE" xml:space="preserve">
     <value>Track Range</value>
   </data>
+  <data name="GLOBAL_FLASH" xml:space="preserve">
+    <value>Flash</value>
+  </data>
+  <data name="MISCS_ANTINEXUSTURRET_ABILITIES" xml:space="preserve">
+    <value>Abilities</value>
+  </data>
+  <data name="GLOBAL_DRAWING" xml:space="preserve">
+    <value>Drawing</value>
+  </data>
 </root>

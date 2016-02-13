@@ -60,7 +60,21 @@ namespace SAssemblies.Detectors
                 SharedExperienceDetector.Menu = menu.AddSubMenu(new LeagueSharp.Common.Menu(Language.GetString("DETECTORS_SHAREDEXPERIENCE_MAIN"), "SAssembliesDetectorsSharedExperience"));
                 SharedExperienceDetector.Menu.AddItem(new MenuItem("SAssembliesDetectorsSharedExperienceResetTime", Language.GetString("DETECTORS_SHAREDEXPERIENCE_RESETTIME")).SetValue(new Slider(60, 120, 1)));
                 SharedExperienceDetector.Menu.AddItem(new MenuItem("SAssembliesDetectorsSharedExperienceTrackRange", Language.GetString("DETECTORS_SHAREDEXPERIENCE_TRACKRANGE")).SetValue(new Slider(2000, 10000, 100)));
+                SharedExperienceDetector.Menu.AddItem(new MenuItem("SAssembliesDetectorsSharedExperiencePingTimes", Language.GetString("GLOBAL_PING_TIMES")).SetValue(new Slider(0, 5, 0)));
+                SharedExperienceDetector.Menu.AddItem(new MenuItem("SAssembliesDetectorsSharedExperiencePingType", Language.GetString("GLOBAL_PING_TYPE")).SetValue(new StringList(new[]
+                {
+                    Language.GetString("GLOBAL_PING_TYPE_NORMAL"),
+                    Language.GetString("GLOBAL_PING_TYPE_DANGER"),
+                    Language.GetString("GLOBAL_PING_TYPE_ENEMYMISSING"),
+                    Language.GetString("GLOBAL_PING_TYPE_ONMYWAY"),
+                    Language.GetString("GLOBAL_PING_TYPE_FALLBACK"),
+                    Language.GetString("GLOBAL_PING_ASSISTME")
+                })));
+                SharedExperienceDetector.Menu.AddItem(new MenuItem("SAssembliesDetectorsSharedExperienceLocalPing", Language.GetString("GLOBAL_PING_LOCAL")).SetValue(true));
+                SharedExperienceDetector.Menu.AddItem(new MenuItem("SAssembliesDetectorsSharedExperienceChat", Language.GetString("GLOBAL_CHAT")).SetValue(false));
+                SharedExperienceDetector.Menu.AddItem(new MenuItem("SAssembliesDetectorsSharedExperienceNotification", Language.GetString("GLOBAL_NOTIFICATION")).SetValue(false));
                 SharedExperienceDetector.Menu.AddItem(new MenuItem("SAssembliesDetectorsSharedExperienceVoice", Language.GetString("GLOBAL_VOICE")).SetValue(false));
+                SharedExperienceDetector.Menu.AddItem(new MenuItem("SAssembliesDetectorsSharedExperienceDrawing", Language.GetString("GLOBAL_DRAWING")).SetValue(false));
                 SharedExperienceDetector.CreateActiveMenuItem("SAssembliesDetectorsSharedExperienceActive", () => new SharedExperience());
             }
             return SharedExperienceDetector;
@@ -98,14 +112,47 @@ namespace SAssemblies.Detectors
                                 if (enemy.Value.LastCallTime + 60 < Game.Time && missingEnemies > 0)
                                 {
                                     enemy.Value.LastCallTime = Game.Time;
+                                    Obj_AI_Hero hero = enemy.Key;
+                                    var t = SharedExperienceDetector.GetMenuItem("SAssembliesDetectorsSharedExperiencePingType").GetValue<StringList>();
+                                    var pingType = (PingCategory)t.SelectedIndex + 1;
+                                    Vector3 pos = hero.ServerPosition;
+                                    for (int i = 0;
+                                        i < SharedExperienceDetector.GetMenuItem("SAssembliesDetectorsSharedExperiencePingTimes").GetValue<Slider>().Value;
+                                        i++)
+                                    {
+                                        if (SharedExperienceDetector.GetMenuItem("SAssembliesDetectorsSharedExperienceLocalPing").GetValue<bool>())
+                                        {
+                                            Game.ShowPing(pingType, pos, true);
+                                        }
+                                        else if (!SharedExperienceDetector.GetMenuItem("SAssembliesDetectorsSharedExperienceLocalPing").GetValue<bool>() &&
+                                                 Menu.GlobalSettings.GetMenuItem("SAssembliesGlobalSettingsServerChatPingActive")
+                                                     .GetValue<bool>())
+                                        {
+                                            Game.SendPing(pingType, pos);
+                                        }
+                                    }
+
+                                    if (SharedExperienceDetector.GetMenuItem("SAssembliesDetectorsSharedExperienceChat").GetValue<bool>() &&
+                                        Menu.GlobalSettings.GetMenuItem("SAssembliesGlobalSettingsServerChatPingActive").GetValue<bool>())
+                                    {
+                                        Game.Say(missingEnemies + " " + Language.GetString("DETECTORS_SHAREDEXPERIENCE_TEXT") + " " + enemy.Key.ChampionName);
+                                    }
                                     if (SharedExperienceDetector.GetMenuItem("SAssembliesDetectorsSharedExperienceVoice").GetValue<bool>())
                                     {
                                         Speech.Speak(missingEnemies + " " + Language.GetString("DETECTORS_SHAREDEXPERIENCE_TEXT") + " " + enemy.Key.ChampionName);
                                     }
+                                    if (SharedExperienceDetector.GetMenuItem("SAssembliesDetectorsSharedExperienceNotification").GetValue<bool>())
+                                    {
+                                        Common.ShowNotification(missingEnemies + " " + Language.GetString("DETECTORS_SHAREDEXPERIENCE_TEXT") + " " + enemy.Key.ChampionName, 
+                                            System.Drawing.Color.Red, 3);
+                                    }
                                 }
-                                enemy.Value.Text.text = "Enemies: " + visibleEnemyCount + "(+" + missingEnemies + ")";
-                                enemy.Value.Circle.Visible = true;
-                                enemy.Value.Text.Visible = true;
+                                if (SharedExperienceDetector.GetMenuItem("SAssembliesDetectorsSharedExperienceDrawing").GetValue<bool>())
+                                {
+                                    enemy.Value.Text.text = "Enemies: " + visibleEnemyCount + "(+" + missingEnemies + ")";
+                                    enemy.Value.Circle.Visible = true;
+                                    enemy.Value.Text.Visible = true;
+                                }
                             }
                         }
                         else
