@@ -133,7 +133,7 @@ namespace SAssemblies.Detectors
                                     if (SharedExperienceDetector.GetMenuItem("SAssembliesDetectorsSharedExperienceChat").GetValue<bool>() &&
                                         Menu.GlobalSettings.GetMenuItem("SAssembliesGlobalSettingsServerChatPingActive").GetValue<bool>())
                                     {
-                                        Game.Say(missingEnemies + " " + Language.GetString("DETECTORS_SHAREDEXPERIENCE_TEXT") + " " + enemy.Key.ChampionName);
+                                        Game.PrintChat(missingEnemies + " " + Language.GetString("DETECTORS_SHAREDEXPERIENCE_TEXT") + " " + enemy.Key.ChampionName);
                                     }
                                     if (SharedExperienceDetector.GetMenuItem("SAssembliesDetectorsSharedExperienceVoice").GetValue<bool>())
                                     {
