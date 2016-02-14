@@ -148,20 +148,17 @@ namespace SAssemblies.Detectors
                                 if (SharedExperienceDetector.GetMenuItem("SAssembliesDetectorsSharedExperienceDrawing").GetValue<bool>())
                                 {
                                     enemy.Value.Text.text = "Enemies: " + visibleEnemyCount + "(+" + missingEnemies + ")";
-                                    enemy.Value.Circle.Visible = true;
                                     enemy.Value.Text.Visible = true;
                                 }
                             }
                             else
                             {
                                 enemy.Value.Text.Visible = false;
-                                enemy.Value.Circle.Visible = false;
                             }
                         }
                         else
                         {
                             enemy.Value.Text.Visible = false;
-                            enemy.Value.Circle.Visible = false;
                         }
                     }
                     enemies[enemy.Key].Experience = enemy.Key.Experience;
@@ -175,7 +172,6 @@ namespace SAssemblies.Detectors
                     enemy.Key.IsDead || !enemy.Key.IsVisible)
                 {
                     enemy.Value.Text.Visible = false;
-                    enemy.Value.Circle.Visible = false;
                 }
             }
         }
@@ -222,8 +218,6 @@ namespace SAssemblies.Detectors
 
             public Render.Text Text;
 
-            public Render.Circle Circle;
-
             public float VisibleTime;
 
             public float LastExpTime;
@@ -241,9 +235,9 @@ namespace SAssemblies.Detectors
                 Text.Visible = false;
                 Text.Add();
 
-                Circle = new Render.Circle(hero, 1600, System.Drawing.Color.OrangeRed);
+                /*Circle = new Render.Circle(hero, 1600, System.Drawing.Color.OrangeRed);
                 Circle.Visible = false;
-                Circle.Add();
+                Circle.Add();*/
             }
         }
     }
